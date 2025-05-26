@@ -1,0 +1,315 @@
+<#SYNOPSIS
+    Checks Windows registry settings against CIS benchmarks and exports compliance report.
+.DESCRIPTION
+    This script validates registry settings against CIS benchmark recommendations.
+    Outputs a CSV report with compliance status for each parameter.
+.NOTES
+    File Name      : CIS_Compliance_Checker.ps1
+    Author         : Your Name
+    Prerequisite   : PowerShell 5.1 or later
+#>
+
+# Output file path
+$outputFile = "CIS_Compliance_Report_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
+
+# Create an array to store all results
+$results = @()
+
+# Function to check registry value compliance
+function Test-RegistryValue {
+    param (
+        [string]$path,
+        [string]$name,
+        [string]$expectedValue,
+        [string]$valueType
+    )
+    
+    try {
+        $regValue = Get-ItemProperty -Path $path -Name $name -ErrorAction Stop
+        
+        if ($valueType -eq "REG_DWORD") {
+            $actualValue = $regValue.$name.ToString()
+            $expectedValue = $expectedValue.Trim()
+            return $actualValue -eq $expectedValue
+        }
+        elseif ($valueType -eq "REG_SZ") {
+            $actualValue = $regValue.$name.ToString().Trim()
+            $expectedValue = $expectedValue.Trim('"').Trim()
+            return $actualValue -eq $expectedValue
+        }
+        else {
+            $actualValue = $regValue.$name.ToString().Trim()
+            $expectedValue = $expectedValue.Trim()
+            return $actualValue -eq $expectedValue
+        }
+    }
+    catch {
+        return $false
+    }
+}
+
+# Function to parse expected value from setting description
+function Get-ExpectedValue {
+    param (
+        [string]$settingDescription
+    )
+    
+    # Extract value between single quotes if present
+    if ($settingDescription -match "'([^']*)'") {
+        return $matches[1]
+    }
+    # Extract value after "set to"
+    elseif ($settingDescription -match "set to\s*'?([^']*?)'?(?:$|,|\.)") {
+        return $matches[1].Trim()
+    }
+    # Extract value after "must be set to"
+    elseif ($settingDescription -match "must be set to\s*'?([^']*?)'?(?:$|,|\.)") {
+        return $matches[1].Trim()
+    }
+    # Extract value after "is set to"
+    elseif ($settingDescription -match "is set to\s*'?([^']*?)'?(?:$|,|\.)") {
+        return $matches[1].Trim()
+    }
+    else {
+        return $settingDescription
+    }
+}
+
+# Function to get registry path and value name from CIS setting
+function Get-RegistryInfo {
+    param (
+        [string]$cisSetting
+    )
+    
+    # This is a simplified mapping - you'll need to expand this with all the actual registry paths
+    $registryMappings = @{
+        "Allow Administrator account lockout" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "EnableAdminAccountLockout"
+            Type = "REG_DWORD"
+        }
+        "Replace a process level token" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "ReplaceProcessLevelToken"
+            Type = "REG_SZ"
+        }
+        "Domain member: Digitally encrypt secure channel data (when possible)" = @{
+            Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters"
+            Name = "SealSecureChannel"
+            Type = "REG_DWORD"
+        }
+        "Interactive logon: Prompt user to change password before expiration" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+            Name = "PasswordExpiryWarning"
+            Type = "REG_DWORD"
+        }
+        "Interactive logon: Smart card removal behavior" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+            Name = "ScRemoveOption"
+            Type = "REG_SZ"
+        }
+        "Microsoft network server: Disconnect clients when logon hours expire" = @{
+            Path = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "EnableForcedLogoff"
+            Type = "REG_DWORD"
+        }
+        "Network Security: Allow PKU2U authentication requests to this computer to use online identities" = @{
+            Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\pku2u"
+            Name = "AllowOnlineID"
+            Type = "REG_DWORD"
+        }
+        "Network security: Force logoff when logon hours expire" = @{
+            Path = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+            Name = "EnableForcedLogoff"
+            Type = "REG_DWORD"
+        }
+        "Windows Firewall: Domain: Firewall state" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile"
+            Name = "EnableFirewall"
+            Type = "REG_DWORD"
+        }
+        "Windows Firewall: Domain: Inbound connections" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile"
+            Name = "DefaultInboundAction"
+            Type = "REG_DWORD"
+        }
+        "WDigest Authentication" = @{
+            Path = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+            Name = "UseLogonCredential"
+            Type = "REG_DWORD"
+        }
+        "Allow Microsoft accounts to be optional" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "MSAOptional"
+            Type = "REG_DWORD"
+        }
+        "Disallow Autoplay for non-volume devices" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+            Name = "NoAutoplayfornonVolume"
+            Type = "REG_DWORD"
+        }
+        "Set the default behavior for AutoRun" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+            Name = "NoAutorun"
+            Type = "REG_DWORD"
+        }
+        "Turn off Microsoft consumer experiences" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+            Name = "DisableWindowsConsumerFeatures"
+            Type = "REG_DWORD"
+        }
+        "Allow Diagnostic Data" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+            Name = "AllowTelemetry"
+            Type = "REG_DWORD"
+        }
+        "Block all consumer Microsoft account user authentication" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "NoConnectedUser"
+            Type = "REG_DWORD"
+        }
+        "Do not allow passwords to be saved" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+            Name = "DisablePasswordSaving"
+            Type = "REG_DWORD"
+        }
+        "Always prompt for password upon connection" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+            Name = "fPromptForPassword"
+            Type = "REG_DWORD"
+        }
+        "Allow Windows Ink Workspace" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace"
+            Name = "AllowWindowsInkWorkspace"
+            Type = "REG_DWORD"
+        }
+        "Allow Basic authentication" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
+            Name = "AllowBasic"
+            Type = "REG_DWORD"
+        }
+        "Allow unencrypted traffic" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
+            Name = "AllowUnencryptedTraffic"
+            Type = "REG_DWORD"
+        }
+        "Configure Automatic Updates" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+            Name = "NoAutoUpdate"
+            Type = "REG_DWORD"
+        }
+        "Turn off toast notifications on the lock screen" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+            Name = "DisableLockScreenToastNotifications"
+            Type = "REG_DWORD"
+        }
+        "Reset account lockout counter after" = @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = "ResetLockoutCount"
+            Type = "REG_DWORD"
+        }
+        "Allow Cortana" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+            Name = "AllowCortana"
+            Type = "REG_DWORD"
+        }
+        "Turn off Microsoft Defender AntiVirus" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+            Name = "DisableAntiSpyware"
+            Type = "REG_DWORD"
+        }
+        "Join Microsoft MAPS" = @{
+            Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\SpyNet"
+            Name = "SpyNetReporting"
+            Type = "REG_DWORD"
+        }
+        # Add all other registry mappings here...
+    }
+    
+    if ($registryMappings.ContainsKey($cisSetting)) {
+        return $registryMappings[$cisSetting]
+    }
+    else {
+        # Return a default path for unmapped settings (you'll need to update these)
+        return @{
+            Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+            Name = $cisSetting.Replace(" ", "")
+            Type = "REG_DWORD"
+        }
+    }
+}
+
+# Process each parameter from the Excel sheet (simulated here)
+$parameters = @(
+    @{ParameterNumber="ISBL-10564-01.009"; CIS="Allow Administrator account lockout"; Setting="'Allow Administrator account lockout' is set to 'Enabled' (MS only)"},
+    @{ParameterNumber="ISBL-10564-01.043"; CIS="Replace a process level token"; Setting="'Replace a process level token' is set to 'LOCAL SERVICE, NETWORK SERVICE'"},
+    @{ParameterNumber="ISBL-10564-01.055"; CIS="Domain member: Digitally encrypt secure channel data (when possible)"; Setting="'Domain member: Digitally encrypt secure channel data (when possible)' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.065"; CIS="Interactive logon: Prompt user to change password before expiration"; Setting="'Interactive logon: Prompt user to change password before expiration' is set to 'between 5 and 14 days'"},
+    @{ParameterNumber="ISBL-10564-01.066"; CIS="Interactive logon: Smart card removal behavior"; Setting="'Interactive logon: Smart card removal behavior' is set to 'Lock Workstation' or higher"},
+    @{ParameterNumber="ISBL-10564-01.073"; CIS="Microsoft network server: Disconnect clients when logon hours expire"; Setting="'Microsoft network server: Disconnect clients when logon hours expire' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.087"; CIS="Network Security: Allow PKU2U authentication requests to this computer to use online identities"; Setting="'Network Security: Allow PKU2U authentication requests to this computer to use online identities' is set to 'Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.089"; CIS="Network security: Force logoff when logon hours expire"; Setting="'Network security: Force logoff when logon hours expire' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.099"; CIS="Windows Firewall: Domain: Firewall state"; Setting="'Windows Firewall: Domain: Firewall state' is set to 'On (recommended)'"},
+    @{ParameterNumber="ISBL-10564-01.100"; CIS="Windows Firewall: Domain: Inbound connections"; Setting="'Windows Firewall: Domain: Inbound connections' is set to 'Block (default)'"},
+    @{ParameterNumber="ISBL-10564-01.159"; CIS="WDigest Authentication"; Setting="'WDigest Authentication' is set to 'Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.214"; CIS="Allow Microsoft accounts to be optional"; Setting="'Allow Microsoft accounts to be optional' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.215"; CIS="Disallow Autoplay for non-volume devices"; Setting="'Disallow Autoplay for non-volume devices' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.216"; CIS="Set the default behavior for AutoRun"; Setting="'Set the default behavior for AutoRun' is set to 'Enabled: Do not execute any autorun commands'"},
+    @{ParameterNumber="ISBL-10564-01.220"; CIS="Turn off Microsoft consumer experiences"; Setting="'Turn off Microsoft consumer experiences' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.224"; CIS="Allow Diagnostic Data"; Setting="'Allow Diagnostic Data' is set to 'Enabled: Diagnostic data off (not recommended)' or 'Enabled: Send required diagnostic data'"},
+    @{ParameterNumber="ISBL-10564-01.246"; CIS="Block all consumer Microsoft account user authentication"; Setting="'Block all consumer Microsoft account user authentication' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.249"; CIS="Do not allow passwords to be saved"; Setting="'Do not allow passwords to be saved' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.251"; CIS="Always prompt for password upon connection"; Setting="'Always prompt for password upon connection' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.258"; CIS="Allow Windows Ink Workspace"; Setting="'Allow Windows Ink Workspace' is set to 'Enabled: On, but disallow access above lock' OR 'Enabled: Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.263"; CIS="Allow Basic authentication"; Setting="Client: 'Allow Basic authentication' is set to 'Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.264"; CIS="Allow unencrypted traffic"; Setting="Client: 'Allow unencrypted traffic' is set to 'Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.270"; CIS="Configure Automatic Updates"; Setting="'Configure Automatic Updates' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.273"; CIS="Turn off toast notifications on the lock screen"; Setting="'Turn off toast notifications on the lock screen' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.280"; CIS="Reset account lockout counter after"; Setting="'Reset account lockout counter after' is set to '5 minutes'"},
+    @{ParameterNumber="ISBL-10564-01.375"; CIS="Allow Cortana"; Setting="'Allow Cortana' must be set to 'Disabled'"},
+    @{ParameterNumber="ISBL-10564-01.381"; CIS="Turn off Microsoft Defender AntiVirus"; Setting="'Turn off Microsoft Defender AntiVirus' is set to 'Enabled'"},
+    @{ParameterNumber="ISBL-10564-01.383"; CIS="Join Microsoft MAPS"; Setting="'Join Microsoft MAPS' must be set to 'Disabled'"}
+    # Add all other parameters here...
+)
+
+foreach ($param in $parameters) {
+    $paramNumber = $param.ParameterNumber
+    $cis = $param.CIS
+    $setting = $param.Setting
+    
+    # Parse expected value from setting description
+    $expectedValue = Get-ExpectedValue -settingDescription $setting
+    
+    # Get registry information for this CIS setting
+    $regInfo = Get-RegistryInfo -cisSetting $cis
+    
+    # Check if the registry value exists and matches expected value
+    $isCompliant = Test-RegistryValue -path $regInfo.Path -name $regInfo.Name -expectedValue $expectedValue -valueType $regInfo.Type
+    
+    # Determine status
+    $status = if ($isCompliant) { "Compliant" } else { "Non-Compliant" }
+    
+    # Check if setting is configured
+    $settingConfigured = try {
+        $null = Get-ItemProperty -Path $regInfo.Path -Name $regInfo.Name -ErrorAction Stop
+        "Configured"
+    } catch {
+        "Non-Configured"
+    }
+    
+    # Add result to collection
+    $results += [PSCustomObject]@{
+        "Parameter Number" = $paramNumber
+        "CIS" = $cis
+        "Expected Value" = $expectedValue
+        "Status" = $status
+        "Settings Configured" = $settingConfigured
+        "Registry Path" = $regInfo.Path
+        "Registry Name" = $regInfo.Name
+    }
+}
+
+# Export results to CSV
+$results | Export-Csv -Path $outputFile -NoTypeInformation -Encoding UTF8
+
+Write-Host "Compliance report generated at: $outputFile"
