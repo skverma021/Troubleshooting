@@ -1,0 +1,31 @@
+# Define parameters
+$remoteComputer = "RemotePC01"                      # Change to your remote computer name or IP
+$localScriptPath = "C:\Scripts\MyScript.ps1"        # Local path to the .ps1 file
+$localXmlPath = "C:\Scripts\MyTask.xml"             # Local path to the .xml file
+$remoteDestination = "C$\Scripts"                   # Remote path under admin share
+$taskName = "MyScheduledTask"                       # Name of the task to import
+
+# Full UNC paths
+$remoteScriptPath = "\\$remoteComputer\$remoteDestination\MyScript.ps1"
+$remoteXmlPath = "\\$remoteComputer\$remoteDestination\MyTask.xml"
+
+# Ensure remote folder exists
+Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
+    New-Item -Path "C:\Scripts" -ItemType Directory -Force | Out-Null
+}
+
+# Copy files to remote machine
+Copy-Item -Path $localScriptPath -Destination $remoteScriptPath -Force
+Copy-Item -Path $localXmlPath -Destination $remoteXmlPath -Force
+
+# Import the task on the remote machine
+Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
+    $taskXmlPath = "C:\Scripts\MyTask.xml"
+    $taskName = "MyScheduledTask"
+
+    if (Test-Path $taskXmlPath) {
+        schtasks.exe /Create /TN $taskName /XML $taskXmlPath /F
+    } else {
+        Write-Error "Task XML file not found at $taskXmlPath"
+    }
+}
