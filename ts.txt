@@ -1,0 +1,34 @@
+# Define parameters
+$remoteComputer = "RemotePC01"                      # Replace with your remote computer name
+$localScriptPath = "C:\Scripts\MyScript.ps1"        # Local .ps1 file path
+$localXmlPath = "C:\Scripts\MyTask.xml"             # Local .xml file path
+$remoteFolder = "I:\cnrycleanup"                    # Remote destination folder
+$taskName = "MyScheduledTask"                       # Scheduled Task name
+
+# Step 1: Ensure remote folder exists, or create it
+Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
+    $path = "I:\cnrycleanup"
+    if (-Not (Test-Path -Path $path)) {
+        New-Item -Path $path -ItemType Directory -Force | Out-Null
+    }
+}
+
+# Step 2: Define full UNC paths for file copy
+$remoteScriptPath = "\\$remoteComputer\I$\cnrycleanup\MyScript.ps1"
+$remoteXmlPath    = "\\$remoteComputer\I$\cnrycleanup\MyTask.xml"
+
+# Step 3: Copy files to remote machine
+Copy-Item -Path $localScriptPath -Destination $remoteScriptPath -Force
+Copy-Item -Path $localXmlPath -Destination $remoteXmlPath -Force
+
+# Step 4: Import the task on the remote computer
+Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
+    $taskXmlPath = "I:\cnrycleanup\MyTask.xml"
+    $taskName = "MyScheduledTask"
+
+    if (Test-Path $taskXmlPath) {
+        schtasks.exe /Create /TN $taskName /XML $taskXmlPath /F
+    } else {
+        Write-Error "Scheduled task XML file not found at $taskXmlPath"
+    }
+}
