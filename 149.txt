@@ -1,0 +1,492 @@
+
+
+
+# Initialize the CSV file
+$outputCsvFile = "ComplianceResults.csv"
+if (Test-Path $outputCsvFile) {
+   Remove-Item $outputCsvFile
+}
+"Title,Output,ComplianceStatus" | Out-File -FilePath $outputCsvFile -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the path to the registry key
+   $regKeyPath = "HKLM:\Software\Policies\Microsoft\Windows\Security\AccountLockoutPolicy"
+   
+   # Define the value name for the policy setting
+   $valueName = "AllowAdministratorLockout"
+   
+   # Try to read the registry value
+   try {
+       # Get the value of the registry key
+       $value = Get-ItemProperty -Path $regKeyPath -Name $valueName -ErrorAction Stop | Select-Object -ExpandProperty $valueName
+   
+       # Check if the value is enabled
+       if ($value -eq "1") {
+           Write-Host "Allow Administrator account lockout is ENABLED."
+       } else {
+           Write-Host "Allow Administrator account lockout is DISABLED."
+       }
+   }
+   catch {
+       # Handle errors, like the registry key not existing
+       Write-Host "Error: Could not read the registry key. Check for errors or ensure the key exists: $($_.Exception.Message)"
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Allow Administrator account lockout' is set to 'Enabled' (MS only)") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Allow Administrator account lockout' is set to 'Enabled' (MS only)"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   $sid_local_service = "S-1-5-19"
+   $sid_network_service = "S-1-5-20"
+   $expected_accounts = @($sid_local_service, $sid_network_service)
+   $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Rights"
+   $registryKey = "SeAssignPrimaryTokenPrivilege"
+   
+   try {
+       $current_accounts = Get-ItemProperty -Path $registryPath -Name $registryKey -ErrorAction Stop | Select-Object -ExpandProperty $registryKey
+       if ($current_accounts) {
+           $current_accounts_array = $current_accounts -split '\r?\n'
+           $all_expected_present = $expected_accounts | ForEach-Object { $_ -in $current_accounts_array } | ForEach-Object { if($_ -eq $false){ return $false } }
+           if ($all_expected_present -ne $false -and $current_accounts_array.Count -eq $expected_accounts.Count) {
+               Write-Host "Replace a process level token is correctly set to LOCAL SERVICE and NETWORK SERVICE."
+           } else {
+               Write-Warning "Replace a process level token is not configured as expected."
+               Write-Host "Expected accounts: $($expected_accounts -join ', ')"
+               Write-Host "Current accounts: $($current_accounts_array -join ', ')"
+           }
+       } else {
+           Write-Warning "Replace a process level token is not defined. It should be set to LOCAL SERVICE and NETWORK SERVICE."
+       }
+   } catch {
+       Write-Error "Error accessing the registry: $($_.Exception.Message)"
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Replace a process level token' is set to 'LOCAL SERVICE NETWORK SERVICE'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Replace a process level token' is set to 'LOCAL SERVICE NETWORK SERVICE'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Registry path for the security policy setting
+   $RegistryKeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NT\LSA"
+   
+   # Value name for the specific policy
+   $RegistryValueName = "EncryptSecureChannel"
+   
+   # Get the value of the policy setting
+   try {
+       $RegistryValue = Get-ItemProperty -Path $RegistryKeyPath -Name $RegistryValueName | Select-Object -ExpandProperty $RegistryValueName
+   }
+   catch {
+       Write-Warning "Error: Unable to access registry key.  Check permissions or key existence."
+       Write-Warning $_.ExceptionMessage
+       return
+   }
+   
+   # Check if the value is enabled
+   if ($RegistryValue -eq 2) {
+       Write-Output "The policy 'Domain member: Digitally encrypt secure channel data (when possible)' is set to Enabled."
+   }
+   else {
+       Write-Output "The policy 'Domain member: Digitally encrypt secure channel data (when possible)' is not set to Enabled."
+       Write-Output "Value is: $RegistryValue"
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Domain member: Digitally encrypt secure channel data (when possible)' is set to 'Enabled'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Domain member: Digitally encrypt secure channel data (when possible)' is set to 'Enabled'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+   $name = "legalnoticecaption"
+   
+   try {
+       $value = Get-ItemProperty -Path $registryPath -Name $name -ErrorAction Stop
+       if ($value) {
+           Write-Host "Interactive logon message title is configured:" $value.legalnoticecaption
+       }
+   }
+   catch {
+       Write-Host "Interactive logon message title is not configured."
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Configure 'Interactive logon: Message title for users attempting to log on'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Configure 'Interactive logon: Message title for users attempting to log on'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\NT\Audit" -Name "PromptUserToChangePasswordBeforeExpiration"
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Interactive logon: Prompt user to change password before expiration' is set to 'between 5 and 14 days'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Interactive logon: Prompt user to change password before expiration' is set to 'between 5 and 14 days'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the registry path
+   $registryPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\PasswordAuthentication\SmartCardLogon"
+   
+   # Define the registry value name
+   $registryValueName = "SmartCardRemovalAction"
+   
+   # Define the required action values (Lock Workstation or higher)
+   $requiredActions = @("2", "3") # Lock Workstation (2) or Force Logoff (3)
+   
+   # Get the current value of the registry setting
+   try {
+       $currentValue = (Get-ItemProperty -Path $registryPath -Name $registryValueName).$registryValueName
+   }
+   catch {
+       Write-Error "Error getting registry value: $($_.Exception.Message)"
+       exit 1 # Indicate an error
+   }
+   
+   # Check if the current value is in the required list
+   if ($requiredActions -contains $currentValue) {
+       Write-Host "The 'Interactive logon: Smart card removal behavior' is set to Lock Workstation or higher."
+       exit 0 # Indicate success
+   } else {
+       Write-Host "The 'Interactive logon: Smart card removal behavior' is NOT set to Lock Workstation or higher."
+       exit 1 # Indicate failure
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Interactive logon: Smart card removal behavior' is set to 'Lock Workstation' or higher") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Interactive logon: Smart card removal behavior' is set to 'Lock Workstation' or higher"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the registry path
+   $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Policy"
+   
+   # Get the value from the registry
+   $value = Get-ItemProperty -Path $registryPath -Name "DisconnectClients" | Select-Object -ExpandProperty DisconnectClients
+   
+   # Check if the value is "1" (Enabled) or "2" (Disabled) and output accordingly
+   if ($value -eq 1) {
+       Write-Host "The policy setting 'Microsoft network server: Disconnect clients when logon hours expire' is set to Enabled."
+   } elseif ($value -eq 2) {
+       Write-Host "The policy setting 'Microsoft network server: Disconnect clients when logon hours expire' is set to Disabled."
+   } else {
+       Write-Host "The policy setting 'Microsoft network server: Disconnect clients when logon hours expire' could not be determined."
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Microsoft network server: Disconnect clients when logon hours expire' is set to 'Enabled'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Microsoft network server: Disconnect clients when logon hours expire' is set to 'Enabled'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the registry key
+   $RegistryKey = "HKLM:\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters"
+   
+   # Define the registry value name
+   $RegistryValueName = "SmbServerNameHardeningLevel"
+   
+   # Get the registry value
+   try {
+       $Value = Get-ItemProperty -Path $RegistryKey -Name $RegistryValueName -ErrorAction Stop | Select-Object -ExpandProperty $RegistryValueName
+   }
+   catch {
+       Write-Error "Error getting registry value: $($_.Exception.Message)"
+       exit 1
+   }
+   
+   # Check if the registry value is set to 1 or higher (Accept if provided by client or higher)
+   if ($Value -ge 1) {
+       Write-Host "The 'Server SPN target name validation level' is set to 'Accept if provided by client' or higher (MS only)."
+   }
+   else {
+       Write-Host "The 'Server SPN target name validation level' is NOT set to 'Accept if provided by client' or higher (MS only)."
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Microsoft network server: Server SPN target name validation level' is set to 'Accept if provided by client' or higher (MS only)") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Microsoft network server: Server SPN target name validation level' is set to 'Accept if provided by client' or higher (MS only)"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\AllowNullSessionPipes"
+   $value = Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue
+   
+   if ($value -ne $null -and $value.PSObject.Properties.Value -eq "") {
+       Write-Host "Network access: Named Pipes that can be accessed anonymously: Configured Securely (No pipes allowed)"
+   } elseif ($value -ne $null) {
+       Write-Host "Network access: Named Pipes that can be accessed anonymously:" $value.PSObject.Properties.Value
+       Write-Host "Status: Not Secure, Review the configured pipes"
+   } else {
+       Write-Host "Network access: Named Pipes that can be accessed anonymously: Not Configured"
+       Write-Host "Status: Not Secure, It is recommended to configure this setting"
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Configure 'Network access: Named Pipes that can be accessed anonymously' (MS only)") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$("Configure 'Network access: Named Pipes that can be accessed anonymously' (MS only)"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   $RegistryPath = "HKLM:\System\CurrentControlSet\Control\Lsa\pku2u"
+   $RegistryValue = "AllowOnlineID"
+   $ValueToCheck = 0
+   
+   try {
+       $AllowOnlineID = Get-ItemProperty -Path $RegistryPath -Name $RegistryValue -ErrorAction Stop | Select-Object -ExpandProperty $RegistryValue
+   
+       if ($AllowOnlineID -eq $ValueToCheck) {
+           Write-Host "The policy 'Network Security: Allow PKU2U authentication requests to this computer to use online identities' is set to Disabled."
+       } else {
+           Write-Host "The policy 'Network Security: Allow PKU2U authentication requests to this computer to use online identities' is not set to Disabled."
+       }
+   }
+   catch {
+       Write-Error "Error: Could not access registry key: $($_.Exception.Message)"
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Network Security: Allow PKU2U authentication requests to this computer to use online identities' is set to 'Disabled'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Network Security: Allow PKU2U authentication requests to this computer to use online identities' is set to 'Disabled'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the registry key path
+   $registryKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Policies\System"
+   
+   # Define the value name
+   $valueName = "LogonHoursAction"
+   
+   # Check if the registry key exists
+   if ( Test-Path $registryKey ) {
+   
+     # Get the value data
+     $valueData = Get-ItemProperty -Path $registryKey -Name $valueName -ErrorAction SilentlyContinue
+   
+     # Check if the value exists
+     if ( $valueData ) {
+   
+       # Check if the value is set to 1 (Enabled)
+       if ( $valueData.LogonHoursAction -eq 1 ) {
+         Write-Host "Network security: Force logoff when logon hours expire is set to Enabled." -ForegroundColor Green
+       } else {
+         Write-Host "Network security: Force logoff when logon hours expire is set to Disabled or not configured." -ForegroundColor Red
+       }
+   
+     } else {
+       Write-Host "LogonHoursAction registry value not found." -ForegroundColor Yellow
+     }
+   
+   } else {
+     Write-Host "Registry key not found." -ForegroundColor Yellow
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Network security: Force logoff when logon hours expire' is set to 'Enabled'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Network security: Force logoff when logon hours expire' is set to 'Enabled'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the Registry Key path
+   $RegistryKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
+   
+   # Define the Registry Value name
+   $RegistryValueName = "LmCompatibilityLevel"
+   
+   # Check if the Registry Key exists
+   if (Test-Path $RegistryKeyPath) {
+   
+     # Get the value of the specified Registry Value
+     $LmCompatibilityLevelValue = (Get-ItemProperty -Path $RegistryKeyPath -Name $RegistryValueName).LmCompatibilityLevel
+   
+     # Check if the value is set to the desired value (5 for "Send NTLMv2 response only, refuse LM and NTLM")
+     if ($LmCompatibilityLevelValue -eq 5) {
+       Write-Host "The registry value 'LmCompatibilityLevel' is set to 5 (NTLMv2 only)."
+     } else {
+       Write-Host "The registry value 'LmCompatibilityLevel' is not set to 5. It is currently set to $($LmCompatibilityLevelValue)."
+     }
+   
+   } else {
+     Write-Host "The registry key '$RegistryKeyPath' does not exist."
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Network security: Restrict NTLM: Audit Incoming NTLM Traffic' is set to 'Enable auditing for all accounts'") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Network security: Restrict NTLM: Audit Incoming NTLM Traffic' is set to 'Enable auditing for all accounts'"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   # Define the registry key path
+   $RegistryKeyPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
+   
+   # Get the value of the RestrictSendingNTLMTraffic key
+   try {
+       $Value = Get-ItemProperty -Path $RegistryKeyPath -Name "RestrictSendingNTLMTraffic"
+       if ($Value.RestrictSendingNTLMTraffic -ge 1) {
+           Write-Output "The 'Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers' setting is set to 'Audit all' or higher."
+       } else {
+           Write-Output "The 'Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers' setting is not set to 'Audit all' or higher."
+       }
+   }
+   catch {
+       Write-Output "Error: Could not access the registry key.  Please ensure the script is run with administrator privileges."
+   }
+
+   # Compare the output with the CIS Title (Parameter Name)
+   if ($output -eq " 'Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers' is set to 'Audit all' or higher") {
+       $complianceStatus = "compliant"
+   } else {
+       $complianceStatus = "non compliant"
+   }
+} catch {
+   $output = "Error: $($_.Exception.Message)"
+   $complianceStatus = "error"
+}
+
+# Write the result to the CSV file
+"$(" 'Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers' is set to 'Audit all' or higher"),$($output.Replace(',', '')),$complianceStatus" | Out-File -FilePath $outputCsvFile -Append -Encoding UTF8
+
+
+try {
+   # Original Parameter Logic
+   $regPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile"
+   $regValue = Get-ItemProperty -Path $regPath -Name EnableFirewall -ErrorAction SilentlyContinue
+   
+   if ($regValue -ne $null) {
+       if ($regValue.EnableFirewall -eq 1) {
+      
