@@ -1,0 +1,1226 @@
+<#
+.SYNOPSIS
+   This script is used to check the compliance of Windows Server 2022 with specific baselines.
+.DESCRIPTION
+   The script checks the compliance of Windows Server 2022 with specific baselines defined in the BASELINE_DICT.
+   It logs the results and creates a JSON file with the compliance details.
+.PARAMETER week_release
+   This parameter is used to specify the week of the release. It is not mandatory.
+.EXAMPLE
+   .\WIN2022.ps1 -release_package "2025W20-0"
+   This command runs the script with the specified week release.
+   Default value is "2025W13-0".
+#>
+param(
+   [parameter(Mandatory = $false)]
+   [string]$release_package = "2025W13-0"
+)
+
+#----------------------------------------------------------
+#       Set Logging/Troubleshooting Options
+#----------------------------------------------------------
+If ($PSBoundParameters['Debug']){
+   $DebugPreference = 'Continue'
+   $Script:Debug = $false
+}
+#----------------------------------------------------------
+#       Setup variables needed for the base script
+#----------------------------------------------------------
+$ErrorActionPreference = "SilentlyContinue"
+
+# D or SystemDrive
+if(Test-Path -Path "D:"){
+   $appsDrive = 'D:'
+}else{
+   $appsDrive = $env:SystemDrive
+}
+
+$Global:OS_PRODUCT = "WIN2022"
+$Global:COMPLIANCE_DICTIONARY = @{}
+$Global:ComplianceFile = "$appsDrive\apps\MOCAT\OS\logs\WIN_OS_Compliance.json"
+#$Global:ComplianceFile = "$env:userprofile/WIN_OS_Compliance.json"
+$Script:ExitCode = 0
+
+#----------------------------------------------------------
+# Setup Logging
+$LogFile = "$appsDrive\apps\MOCAT\OS\logs\win_os_compliance.log"
+$Script:AllValuesToLog = $true
+If (Test-Path $LogFile) { Remove-Item $LogFile -Force }
+
+#-----------------------------------------------------------
+#Set up Audit files
+$Script:AuditPolResults = "C:\temp\audit_auditpol_results.txt"
+$Script:SeceditResults = "C:\temp\audit_secedit_results.txt"
+Remove-Item $AuditPolResults -Force -WhatIf:$false -ErrorAction SilentlyContinue
+Remove-Item $SeceditResults -Force -WhatIf:$false -ErrorAction SilentlyContinue
+
+# BASELINES these are used to run BaselineCheck{} dynamically
+$Global:BASELINE_DICT = @{
+    '009' = 'ISBL-10564-01.009' # ALLOW ADMINISTRATOR ACCOUNT LOCKOUT
+    '043' = 'ISBL-10564-01.043' # Replace a process level token
+    '055' = 'ISBL-10564-01.055' # Domain member: Digitally encrypt secure channel data (when possible)
+    '064' = 'ISBL-10564-01.064' # Configure Interactive logon: Message title for users attempting to log on
+    '065' = 'ISBL-10564-01.065' # Interactive logon: Prompt user to change password before expiration
+    '066' = 'ISBL-10564-01.066' # Interactive logon: Smart card removal behavior
+    '073' = 'ISBL-10564-01.073' # Microsoft network server: Disconnect clients when logon hours expire
+    '074' = 'ISBL-10564-01.074' # Microsoft network server: Server SPN target name validation level
+    '079' = 'ISBL-10564-01.079' # Configure Network access: Named Pipes that can be accessed anonymously
+    '087' = 'ISBL-10564-01.087' # Network Security: Allow PKU2U authentication requests to this computer to use online identities
+    # Existing baselines from newbasescript.txt
+    '1' = 'ISBL-#####-##.##1' # Dummy Compliance
+    '128' = 'ISBL-10564-01.128' # AUDIT ACCOUNT LOCKOUT
+    '129' = 'ISBL-10564-01.129' # AUDIT GROUP MEMBERSHIP
+    '130' = 'ISBL-10564-01.130' # AUDIT LOGOFF
+    '127' = 'ISBL-10564-01.127' # AUDIT PROCESS CREATION
+    '126' = 'ISBL-10564-01.126' # AUDIT PNP ACTIVITY
+    '125' = 'ISBL-10564-01.125' # AUDIT USER ACCOUNT MANAGEMENT
+    '124' = 'ISBL-10564-01.124' # AUDIT SECURITY GROUP MANAGEMENT
+    '123' = 'ISBL-10564-01.123' # AUDIT APPLICATION GROUP MANAGEMENT
+    '122' = 'ISBL-10564-01.122' # AUDIT CREDENTIAL VALIDATION
+    '121' = 'ISBL-10564-01.121' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG SUCCESSFUL CONNECTIONS
+    '120' = 'ISBL-10564-01.120' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG DROPPED PACKETS
+    '119' = 'ISBL-10564-01.119' # WINDOWS FIREWALL: PUBLIC: LOGGING: SIZE LIMIT (KB)
+}
+#####################################################
+#                  LOGGER
+#####################################################
+## Used to write Log information
+Function Write-Log ($Level, $Details, $NewLine=$false) {
+   $Time = get-date -F "yyyy-MM-dd HH:mm:ss,fff"
+
+   switch ($Level) {
+       0 { $LogLevel = "INFO" }
+       1 { $LogLevel = "WARNING" }
+       2 { $LogLevel = "ERROR" }
+   }
+   "$Time`t$Section`t$LogLevel`t$Details" | Out-File $LogFile -append
+   If ($NewLine -eq $True) { "`n" | Out-File $LogFile -append }
+}
+
+########################################################
+#           PULL SERVER NAME AND DRIVE INFO
+########################################################
+
+Function Get-ServerInfo {
+   #Server Info
+   Try {
+       $OS = Get-WmiObject -class Win32_OperatingSystem | Select-Object -ExpandProperty Caption
+       If ($OS -notlike "*2022*") {
+           Write-Log 0 "Platform identified as Windows 2022"
+       } else {
+           Write-log 2 "Platform identified as $OS"
+           Write-log 2 "This script is only supported on Windows Server 2022"
+           Exit(22)
+       }
+   }
+   Catch {
+       Write-log 2 "Failed to get Platform identity. Error: $_.Exception"
+       Exit(19)
+   }
+}
+
+########################################################
+#                   EXECUTEAUDITS
+########################################################
+Function ExecuteAudits {
+   Write-Log 0 "Inventory log file located at: $LogFile"
+   Write-Log 0 "Begin writing discovered product's attributes"
+
+   #$INSTANCE_BASELINES = New-Object PSObject @{} # Step 1
+   $INSTANCE_BASELINES = [Ordered]@{}
+   Create-AuditpolResults
+   Create-SeceditResults
+   #################################################################
+   #               RUN BASELINECHECKS
+   #################################################################
+   ForEach($BASEKEY in $BASELINE_DICT.Keys|Sort-Object){
+       $BASELINE_NAME = $BASELINE_DICT[$BASEKEY]
+
+       #EXECUTE BASELINE FUNCTIONS
+       try {
+           $BaselineFunction = "BaselineCheck{0}" -f $BASEKEY
+           $FUNCRESULT = & $BaselineFunction -CheckName $BASELINE_NAME
+           $INSTANCE_BASELINES[$BASELINE_NAME] = $FUNCRESULT
+       }
+       catch {
+           Write-Log 2 "Error outputing $BASELINE_NAME"
+           Write-Output "Error outputing $BASELINE_NAME"
+           $_
+       }
+   }
+
+   ###################################################################
+   Write-Log 0 " "
+
+   # Baseline completed create JSON file
+   if ($INSTANCE_BASELINES.Count -gt 0) {
+       # Create Check Details Dict
+       $CHECK_DETAILS = create_check_details
+       # Add product key to instances, embed in check details
+       $CHECK_DETAILS[$OS_PRODUCT] = $INSTANCE_BASELINES
+       $Global:COMPLIANCE_DICTIONARY["CheckDetails"] = $CHECK_DETAILS
+
+       $CREATED = create_compliance_json
+       if($CREATED -eq $true) {
+           Write-Log 0 "Created: $OS_PRODUCT compliance file"
+           Write-Output "Created: $Global:ComplianceFile"
+       }
+   }else{
+       Write-Log 2 "Unable to execute compliance functions"
+       Write-Output "Unable to execute compliace functions"
+       Exit(33)
+   }
+
+   # End of ExecuteAudits
+}
+
+########################################################
+#              CREATE CHECK DETAILS
+########################################################
+Function create_check_details(){
+   $d = [Ordered]@{}
+   $servername = $env:COMPUTERNAME
+   $auditTime = get-date -f "MM/dd/yyyy HH:mm:ss"
+   $os_version = [Environment]::OSVersion.Version.ToString()
+   $audit_result_date = get-date -format "yyyyMMdd"
+
+   $d["AUDIT_NAME"] =  "OS_COMPLIANCE"
+   $d["OS_Version"] = $os_version
+   $d["OS_FAMILY"] = "Windows Server 2022"
+   $d["SOURCE_CODE"] = "DCAF"
+   $d["AUDIT_RESULT_ID"] ="$($audit_result_date)0001"
+   $d["AUDIT_DATE"] = $auditTime
+   $d["ORM_VERSION"] = $release_package
+   $d["ORM_Script_Integrity"] = "True"
+   $d["SERVER_NAME"] = $servername
+   return $d
+}
+
+########################################################
+#              CREATE COMPLIANCE JSON
+########################################################
+Function create_compliance_json(){
+   $success = $false
+   try{
+       $JSON_OUTPUT = $Global:COMPLIANCE_DICTIONARY|ConvertTo-Json -Depth 5 -ErrorAction Stop
+       If(Test-Path -path $Global:ComplianceFile){Remove-Item -Path $Global:ComplianceFile -Force}
+       sleep 2
+       $JSON_OUTPUT|
+       ForEach-Object{
+           # Optional Code used to change default JSON spacing in Powershell
+           $_ -replace "(?m)  (?<=^(?:  )*)", " "
+       }| Out-File -FilePath $Global:ComplianceFile -Encoding utf8 -Force -NoClobber -ErrorAction Stop
+       sleep 2
+       $filecontent = Get-Content $Global:ComplianceFile
+       [System.IO.File]::WriteAllLines($Global:ComplianceFile, $filecontent)
+
+       if(Test-Path -Path $Global:ComplianceFile){
+           $success = $true
+       }
+   } catch {
+       Write-Log 2 "ERROR Creating compliance JSON"
+   }
+   return $success
+}
+
+########################################################
+#             BASELINE HELPER FUNCTIONS
+########################################################
+
+# Dumps auditpol results to a file
+Function Create-AuditpolResults() {
+   #$AuditPolCommand = & "$env:SystemRoot/system32/auditpol.exe" /get /category:* /r > $Script:AuditPolResults
+   $AuditPolCommand = & "$env:SystemRoot\system32\auditpol.exe" /get /category:* /r > $Script:AuditPolResults
+   if(Test-Path $AuditPolResults){
+       Write-Log 0 "Auditpol results file created at $AuditPolResults"
+       return $true
+   } else {
+       Write-log 2 "Auditpol results file NOT created at $AuditPolResults"
+       return $false
+   }
+}
+
+#Dump secedit results to a file
+Function Create-SeceditResults(){
+   #$SeceditCommand = & "$env:SystemRoot/system32/secedit.exe" /export /areas USER_RIGHTS /cfg $Script:SeceditResults
+   $SeceditCommand = secedit /export /areas USER_RIGHTS /cfg $Script:SeceditResults
+   if(Test-Path $SeceditResults){
+       Write-Log 0 "Secedit results file created at $SeceditResults"
+       return $true
+   } else {
+       Write-log 2 "Secedit results file NOT created at $SeceditResults"
+       return $false
+   }
+}
+
+Function getInfoWithAuditPol(){
+   params(
+       [string]$PRIVGUID
+   )
+
+   $AuditPolMatch = ""
+   if(Test-Path $AduitPolResults){
+       $SecurityPolicyExport = Get-Content $AuditPolResults
+       If($SecurityPolicyExport -match $PRIVGUID){
+           Write-Debug "$PRIVGUID Found"
+           $vLine = $SecurityPolicyExport | Where {$_.Contains($PRIVGUID)}
+           Write-Debug "$PRIV Line:$vLine"
+           $vLineSplit = $vLine.Split(",")
+           $AuditPolMatch = $vLineSplit[4].Trim()
+           Write-Debug "Result:$AuditPolMatch"
+       }Else{
+           Write-Debug "$PRIV not found in results"
+       }
+   }Else{
+       Write-Debug "Auditpol export output not found."
+   }
+   Return $AuditPolMatch
+}
+
+# Function TranslateSid([string]$vSID) {
+#     If ($vSID -match "\*S") {
+#         $vSID = $vSID.TrimStart("*")
+#         Write-Debug "Translating SID: $vSID"
+#         try {
+#             $objSID = New-Object System.Security.Principal.SecurityIdentifier($vSID)
+#             $objUser = $objSID.Translate( [System.Security.Principal.NTAccount])
+#         }
+#         catch [Exception] {
+#             Write-Debug "Translate failed"
+#             Return $vSID
+#         }
+#         $vName = $objUser.Value
+#         Write-Debug "Translated SID Name: $vName($vSID)"
+#         Return $vName
+#     }
+#     else {
+#         Return $vSID
+#     }
+# }
+Function getInfoWithSeceditSingle([string]$vPriv) {
+   if ($vPriv -NotLike "Se*") {
+       $vPriv = TranslateURAHuman($vPriv)
+   }
+
+   $SecEditMatchList = ""
+   if (Test-Path $SeceditResults) {
+       $SecurityPolicyExport = Get-Content $SeceditResults
+       foreach ($line in $SecurityPolicyExport) {
+           if ($line -like "$vPriv`*") {
+               Write-Debug "PRIV Line: $line"
+               $vLineSplit = $line.Split("=")
+               $vLineTemp = $vLineSplit[1].Trim()
+               Write-Debug "PRIV DATA: $vLineTemp"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-544", "Administrators"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-11", "Authenticated Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-7", "Anonymous Logon"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-546", "Guests"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-19", "Local Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-20", "Network Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-6", "Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-568", "IIS_IUSRS"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-547", "Power Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-1-0", "Everyone"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-545", "Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-551", "Backup Operators"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-4", "Interactive"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-549", "Server Operators"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1123561945-1708537768-1801674531-1132", "Object Recovery" #AD-ENT
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1960408961-287218729-839522115-1109", "Object Recovery" #QA-ENT
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1292428093-1770027372-839522115-1108", "Object Recovery" #DEV-ENT
+               $SecEditMatchList = $vLineTemp.Split(",")
+           }
+       }
+   }
+   else {
+       Write-log 2 "Secedit export output not found at $env:systemdrive\temp\audit_secedit_results.txt"
+       Write-Debug "Secedit export output not found at $env:systemdrive\temp\audit_secedit_results.txt"
+   }
+   Return $SecEditMatchList
+}
+
+function RegKeyExists {
+   param (
+       [parameter(Mandatory = $true)]
+       [ValidateNotNullOrEmpty()]
+       [string]$RegistryPath,
+
+       [parameter(Mandatory = $true)]
+       [ValidateNotNullOrEmpty()]
+       [string]$PropertyName
+   )
+
+   try {
+       # Check if the registry path exists
+       if (Test-Path -Path $RegistryPath) {
+           $PropertyValue = Get-ItemProperty -Path $RegistryPath -ErrorAction Stop | Select-Object -ExpandProperty $PropertyName -ErrorAction Stop
+           return $true
+       }
+       return $false
+   } catch {
+       # If any error occurs, assume the property does not exist
+       return $false
+   }
+}
+
+########################################################
+#
+########################################################
+# Function to handle Registry compliance
+function Test-Registry {
+   param (
+       [Parameter(Mandatory)]
+       [hashtable]$Requirement
+   )
+   $CISName = $Requirement."CIS Name" # Friendly Check Name
+   $RegistryPath = $Requirement.Path
+   $ValueName = $Requirement.ValueName
+   $ExpectedValue = $Requirement.ExpectedValue
+   $MustExist = $Requirement.MustExist
+   $ComparisonType = $Requirement.Comparator
+
+   $Expected = $CISName
+   $ReturnResult = ''
+   $ReturnCode = 1
+   $ErrorMessage = ''
+
+   Write-Debug "Testing Registry for: $($Requirement['CIS Name'])"
+   if (Test-Path -Path $RegistryPath) {
+       $RegProperty = Get-ItemProperty -Path $RegistryPath -Name $ValueName -ErrorAction SilentlyContinue
+
+       if ($null -ne $RegProperty -and $RegProperty.PSObject.Properties.Name -contains $ValueName) {
+           if ($RegProperty.$ValueName -is [array]) {
+               $CurrentValue = ($RegProperty.$ValueName | ForEach-Object { $_.ToString() }) -join ", "
+           } else {
+               $CurrentValue = $RegProperty.$ValueName.ToString()
+           }
+
+           if ($ComparisonType -eq "=" -and $CurrentValue -eq $ExpectedValue) {
+               $ReturnCode = 0
+               $ReturnResult = "Expected value matched: $ExpectedValue"
+           } elseif ($ComparisonType -eq ">" -and $CurrentValue -gt $ExpectedValue) {
+               $ReturnCode = 0
+               $ReturnResult = "Value is greater than: $CurrentValue > $ExpectedValue"
+           } elseif ($ComparisonType -eq "<" -and $CurrentValue -lt $ExpectedValue) {
+               $ReturnCode = 0
+               $ReturnResult = "Value is less than: $CurrentValue < $ExpectedValue"
+           }elseif ($ComparisonType -eq ">=" -and $CurrentValue -ge $ExpectedValue) {
+               $ReturnCode = 0
+               $ReturnResult = "Value is greater than or equal: $CurrentValue >= $ExpectedValue"
+           } elseif ($ComparisonType -eq "<=" -and $CurrentValue -le $ExpectedValue) {
+               $ReturnCode = 0
+               $ReturnResult = "Value is less than or equal: $CurrentValue <= $ExpectedValue"
+           } else {
+               $ReturnCode = 1
+               $ReturnResult = "Value does not meet the expected condition. Found: $CurrentValue, Expected: $ComparisonType $ExpectedValue"
+               $ErrorMessage = "Comparison failed for $ValueName with $ComparisonType"
+           }
+       } else {
+           if(-not $MustExist){
+               $ReturnCode = 0
+               $ReturnResult = "Registry not set/found"
+           }else {
+               $ReturnCode = 1
+               $ReturnResult = "Registry value '$ValueName' not found"
+               $ErrorMessage = "Registry value '$ValueName' does not exist in registry path '$RegistryPath'"
+           }
+       }
+   } else {
+       $ReturnCode = 1
+       $ReturnResult = "Registry not Found"
+       $ErrorMessage = "Registry Path '$RegistryPath' does not exist."
+   }
+
+   #Compliance Dictionary
+   $CheckResults = @{}
+   $CheckResults["sExpectedValue"] = $Expected
+   $CheckResults["sReturnValue"] = $ReturnResult
+   $CheckResults["bIsCompliant"] = $ReturnCode
+   $CheckResults["sErrorMessage"] = $ErrorMessage
+   return $CheckResults
+}
+
+# Function to handle Secedit compliance
+Function Test-Secedit {
+   param (
+       [Parameter(Mandatory)]
+       [hashtable]$Requirement
+   )
+
+   $CISName = $Requirement."CIS Name" # Friendly Check Name
+   $SeceditKey = $Requirement.SeceditKey
+   $ExpectedValue = $Requirement.ExpectedValue
+
+   $Expected = $CISName
+   $ReturnResult = ''
+   $ReturnCode = 1
+   $ErrorMessage = ''
+
+   if (Test-Path $Script:SeceditResults) {
+       $SecurityPolicyExport = Get-Content $Script:SeceditResults
+       # Ensure file is not empty
+       if ($SecurityPolicyExport.Count -eq 0) {
+           $ReturnResult = 'Secedit results file is empty'
+           $ReturnCode = 1
+           $ErrorMessage = 'Secedit export output is empty at ' + $Script:SeceditResults
+           return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+       }
+       foreach ($line in $SecurityPolicyExport) {
+           if ($line -like "$SeceditKey`*") {
+               Write-Debug "SeceditKey Line: $line"
+               $vLineSplit = $line.Split("=")
+               $vLineTemp = $vLineSplit[1].Trim()
+               Write-Debug "SeceditKey DATA: $vLineTemp"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-544", "Administrators"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-11", "Authenticated Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-7", "Anonymous Logon"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-546", "Guests"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-19", "Local Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-20", "Network Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-6", "Service"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-568", "IIS_IUSRS"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-547", "Power Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-1-0", "Everyone"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-545", "Users"
+               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-551", "Backup Operators"
+               # Split the line into SID entries
+               $SecEditSIDS = $vLineTemp.Split(",")
+               $SIDs = Normalize_SecEdit_Results $SecEditSIDS # Assuming Normalize_SecEdit_Results exists and is defined elsewhere in the actual script
+               if($SIDs){
+                   # Check if SIDs expected are missing
+                   $Missing_Values = ''
+                   foreach ($ThisCondition in $ExpectedValue.Split(',')) {
+                       $ContainsCondition = $false
+                       foreach ($secedit_sid in $SIDs.Split(',')) {
+                           if ($secedit_sid -eq $ThisCondition) {
+                               $ContainsCondition = $true
+                           }
+                       }
+                       if ($ContainsCondition -eq $false) {
+                           $Missing_Values = "Missing " + $ThisCondition + "|"
+                           $ReturnCode = 1
+                           $ReturnResult = ""
+                           break
+                       }
+                   }
+               } else {
+                   if($ExpectedValue -eq ""){
+                       $ReturnCode = 0
+                       $ReturnResult = "Sids not found for $SeceditKey"
+                   } else {
+                       $ReturnCode = 1
+                       $ReturnResult = "Sids not found for $SeceditKey"
+                   }
+               }
+               # Check if there are additional SIDs that are not expected
+               $Extra_Values = ''
+               foreach ($secedit_sid in $SIDs.Split(',')) {
+                   $ContainsCondition = $false
+                   foreach ($ThisCondition in $ExpectedValue.Split(',')) {
+                       if ($secedit_sid -eq $ThisCondition) {
+                           $ContainsCondition = $true
+                       }
+                   }
+                   if ($ContainsCondition -eq $false) {
+                       $Extra_Values = "Extra " + $secedit_sid + "|"
+                       break
+                   }
+               }
+               if($Extra_Values -or $Missing_Values){
+                   $Missing_Values = $Missing_Values.Trim("|")
+                   $Extra_Values = $Extra_Values.Trim('|')
+                   if ($Missing_Values -and $Extra_Values) {
+                       $ReturnResult = "$Missing_Values; $Extra_Values"
+                   } elseif ($Missing_Values) {
+                       $ReturnResult = "$Missing_Values"
+                   } elseif ($Extra_Values) {
+                       $ReturnResult = "$Extra_Values"
+                   }
+                   $ReturnCode = 1
+               } else {
+                   $ReturnCode = 0
+                   $ReturnResult = "Found $SIDs"
+               }
+           } else {
+               $ReturnResult = 'Secedit key not found'
+               $ReturnCode = 1
+               $ErrorMessage = 'Secedit key ' + $SeceditKey + ' not found in export'
+           }
+       }
+   } else {
+       $ReturnResult = 'Secedit results file not found'
+       $ReturnCode = 1
+       $ErrorMessage = 'Secedit export output not found at ' + $Script:SeceditResults
+   }
+   return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+}
+
+Function Normalize_SecEdit_Results($SecEditSIDS){
+   $results = ""
+   foreach ($entry in $SecEditSIDS) {
+       $entry = $entry.Trim()
+       if ($entry -ne "") {
+           $results = "$results,$entry"
+       }
+   }
+   If ($results.Length -gt 0) {
+       $results = $results.Trim(",")
+   }
+   return $results
+}
+
+# Function to handle Service compliance
+function Test-Service {
+   param (
+       [Parameter(Mandatory)]
+       [hashtable]$Requirement
+   )
+   $CISName = $Requirement."CIS Name" # Friendly Check Name
+   $ServiceName = $Requirement.ServiceName
+   $ExpectedValue = $Requirement.ExpectedValue
+   $Expected = $CISName
+   $ReturnResult = ''
+   $ReturnCode = 1
+   $ErrorMessage = ''
+
+   # ExpectedValue can be "Disabled", "Running,Automatic", etc.
+   $ExpectedParts = $ExpectedValue.Split(',') | ForEach-Object { $_.Trim() }
+   $ExpectedStatus = $ExpectedParts[0]
+   $ExpectedStartType = if ($ExpectedParts.Count -gt 1) { $ExpectedParts[1] } else { $null }
+
+   $Service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+   if ($Service) {
+       $CurrentStatus = $Service.Status.ToString()
+       $CurrentStartType = $Service.StartType.ToString()
+       $CurrentValue = $CurrentStatus
+       if ($ExpectedStartType) { $CurrentValue += ",$CurrentStartType" }
+
+       $IsStatusCompliant = ($CurrentStatus -eq $ExpectedStatus)
+       $IsStartTypeCompliant = if ($ExpectedStartType) { $CurrentStartType -eq $ExpectedStartType } else { $true }
+
+       if ($IsStatusCompliant -and $IsStartTypeCompliant) {
+           $ReturnCode = 0
+           $ReturnResult = "$ServiceName found with $ExpectedValue"
+       } else {
+           $ReturnCode = 1
+           $ReturnResult = "$ServiceName Status: $CurrentStatus; StartType: $CurrentStartType"
+           $ErrorMessage = "$ServiceName not $ExpectedValue"
+       }
+   } else {
+       $ReturnCode = 1
+       $ReturnResult = "Service Not Found"
+       $ErrorMessage = "Service $ServiceName not found"
+   }
+   #Compliance Dictionary
+   $CheckResults = @{}
+   $CheckResults["sExpectedValue"] = $Expected
+   $CheckResults["sReturnValue"] = $ReturnResult
+   $CheckResults["bIsCompliant"] = $ReturnCode
+   $CheckResults["sErrorMessage"] = $ErrorMessage
+   return $CheckResults
+}
+
+# Function to handle AuditPol compliance
+function Test-AuditPol {
+   param (
+       [Parameter(Mandatory)]
+       [hashtable]$Requirement
+   )
+   $CISName = $Requirement."CIS Name" # Friendly Check Name
+   $AuditCategory = $Requirement.AuditCategory
+   $CategoryGUID = $Requirement.CategoryGUID
+   $ExpectedValue = $Requirement.ExpectedValue
+   $ComparisonType = $Requirement.ComparisonType
+
+   $Expected = $CISName
+   $ReturnResult = ''
+   $ReturnCode = 1
+   $ErrorMessage = ''
+
+   if(Test-Path $Script:AuditPolResults){
+       $result = getInfoWithAuditPol -PRIVGUID $CategoryGUID
+       if($result){
+           if($ComparisonType -eq "Match" -and ($result -like "*$ExpectedValue*")){
+               $ReturnCode = 0
+               $ReturnResult = "Found $result"
+           } elseif ($ComparisonType -eq "Equal" -and ($result -eq $ExpectedValue)){
+               $ReturnCode = 0
+               $ReturnResult = "Found $result"
+           } else {
+               $ReturnCode = 1
+               $ReturnResult = "Found $result"
+               $ErrorMessage = "Expected Value; $ExpectedValue; Found $result"
+           }
+       } else {
+           $ReturnCode = 1
+           $ReturnResult = "Improper Comparisontype"
+           $ErrorMessage = "Improper ComparisonType $ComparisonType"
+       }
+   }Else{
+       $ReturnCode = 1
+       $ReturnResult = "$CategoryGUID not found in results"
+       $ErrorMessage = "$CategoryGUID not found in results"
+   }
+   #Compliance Dictionary
+   $CheckResults = @{}
+   $CheckResults["sExpectedValue"] = $Expected
+   $CheckResults["sReturnValue"] = $ReturnResult
+   $CheckResults["bIsCompliant"] = $ReturnCode
+   $CheckResults["sErrorMessage"] = $ErrorMessage
+   return $CheckResults
+}
+
+########################################################
+# BEGIN BASELINE CHECKS
+########################################################
+
+# Existing BaselineCheck009 (from newbasescript.txt)
+Function BaseLineCheck009([string]$CheckName) {
+   $Requirements = @{
+       "ISBL"          = "ISBL-10564-01.009"
+       "CIS Name"      = "ALLOW ADMINISTRATOR ACCOUNT LOCKOUT"
+       "CheckType"     = "Registry"
+       "Path"          = "HKLM:\Software\Policies\Microsoft\Windows\Safer\CodeIdentifiers"
+       "ValueName"     = "AllowAdminAccountLockout"
+       "ExpectedValue" = "1"
+       "MustExist"     = $true
+       "Comparator"    = "="
+   }
+
+   $ComplianceValues = Test-Registry -Requirement $Requirements
+   if(-not $ComplianceValues){
+       $ReturnResult = 'Error Returning Value'
+       $ReturnCode = 1
+       $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+       return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+   }
+
+   return $ComplianceValues
+}
+
+Function BaseLineCheck043([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.043"
+        "CIS Name"      = "Replace a process level token"
+        "CheckType"     = "Secedit"
+        "SeceditKey"    = "SeAssignPrimaryTokenPrivilege" # Common Secedit key for this setting
+        "ExpectedValue" = "LOCAL SERVICE,NETWORK SERVICE"
+    }
+    $ComplianceValues = Test-Secedit -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck055([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.055"
+        "CIS Name"      = "Domain member: Digitally encrypt secure channel data (when possible)"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+        "ValueName"     = "RequireSignOrSeal"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck064([string]$CheckName) {
+    # For "Configure Interactive logon: Message title for users attempting to log on",
+    # the compliance usually means the key exists and has a non-empty value.
+    # Custom logic is used here since Test-Registry does not directly support "not empty" checks.
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.064"
+        "CIS Name"      = "Configure Interactive logon: Message title for users attempting to log on"
+        "CheckType"     = "Registry" # Although custom logic, it's still a registry check.
+        "Path"          = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
+        "ValueName"     = "LegalNoticeCaption"
+    }
+
+    $ReturnResult = ''
+    $ReturnCode = 1
+    $ErrorMessage = ''
+    $Expected = $CheckName
+
+    try {
+        if (Test-Path -Path $Requirements.Path) {
+            $RegProperty = Get-ItemProperty -Path $Requirements.Path -Name $Requirements.ValueName -ErrorAction SilentlyContinue
+            if ($null -ne $RegProperty -and $RegProperty.PSObject.Properties.Name -contains $Requirements.ValueName) {
+                $CurrentValue = $RegProperty.$($Requirements.ValueName).ToString()
+                if ($CurrentValue -ne "" -and $CurrentValue -ne " ") { # Check if not empty or just a space
+                    $ReturnCode = 0
+                    $ReturnResult = "Configured: '$CurrentValue'"
+                } else {
+                    $ReturnCode = 1
+                    $ReturnResult = "Not Configured (empty or space)"
+                    $ErrorMessage = "Registry value '$($Requirements.ValueName)' is empty or just a space."
+                }
+            } else {
+                $ReturnCode = 1
+                $ReturnResult = "Registry value '$($Requirements.ValueName)' not found"
+                $ErrorMessage = "Registry value '$($Requirements.ValueName)' does not exist in registry path '$($Requirements.Path)'"
+            }
+        } else {
+            $ReturnCode = 1
+            $ReturnResult = "Registry Path Not Found"
+            $ErrorMessage = "Registry Path '$($Requirements.Path)' does not exist."
+        }
+    } catch {
+        $ReturnCode = 1
+        $ReturnResult = "Error Checking Value"
+        $ErrorMessage = "An error occurred: $($_.Exception.Message)"
+    }
+    return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+}
+
+Function BaseLineCheck065([string]$CheckName) {
+    # Special handling for range check: "between 5 and 14 days"
+    $MinExpectedValue = 5
+    $MaxExpectedValue = 14
+    $RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    $ValueName = "PasswordExpiryWarningDays"
+
+    $ReturnResult = ''
+    $ReturnCode = 1
+    $ErrorMessage = ''
+    $Expected = $CheckName # Original CIS Name for display
+
+    try {
+        if (Test-Path -Path $RegistryPath) {
+            $RegProperty = Get-ItemProperty -Path $RegistryPath -Name $ValueName -ErrorAction SilentlyContinue
+            if ($null -ne $RegProperty -and $RegProperty.PSObject.Properties.Name -contains $ValueName) {
+                $CurrentValue = [int]$RegProperty.$ValueName
+                if ($CurrentValue -ge $MinExpectedValue -and $CurrentValue -le $MaxExpectedValue) {
+                    $ReturnCode = 0
+                    $ReturnResult = "Value is within range: $CurrentValue days"
+                } else {
+                    $ReturnCode = 1
+                    $ReturnResult = "Value out of range: $CurrentValue days"
+                    $ErrorMessage = "Expected value between $MinExpectedValue and $MaxExpectedValue, found $CurrentValue"
+                }
+            } else {
+                $ReturnCode = 1
+                $ReturnResult = "Registry value '$ValueName' not found"
+                $ErrorMessage = "Registry value '$ValueName' does not exist in registry path '$RegistryPath'"
+            }
+        } else {
+            $ReturnCode = 1
+            $ReturnResult = "Registry Path Not Found"
+            $ErrorMessage = "Registry Path '$RegistryPath' does not exist."
+        }
+    } catch {
+        $ReturnCode = 1
+        $ReturnResult = "Error Checking Value"
+        $ErrorMessage = "An error occurred: $($_.Exception.Message)"
+    }
+    return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+}
+
+Function BaseLineCheck066([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.066"
+        "CIS Name"      = "Interactive logon: Smart card removal behavior"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+        "ValueName"     = "ScRemoveOption"
+        "ExpectedValue" = "1" # 1 = Lock Workstation
+        "MustExist"     = $true
+        "Comparator"    = ">=" # "Lock Workstation" or higher
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck073([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.073"
+        "CIS Name"      = "Microsoft network server: Disconnect clients when logon hours expire"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters"
+        "ValueName"     = "DisconnectAtLogoff"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck074([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.074"
+        "CIS Name"      = "Microsoft network server: Server SPN target name validation level"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters"
+        "ValueName"     = "SmbServerNameHardeningLevel"
+        "ExpectedValue" = "1" # Accept if provided by client
+        "MustExist"     = $true
+        "Comparator"    = ">=" # "Accept if provided by client" or higher
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck079([string]$CheckName) {
+    # This setting usually means restricting access, so an empty list of pipes is desired for security.
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.079"
+        "CIS Name"      = "Configure Network access: Named Pipes that can be accessed anonymously"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+        "ValueName"     = "NullSessionPipes"
+        "ExpectedValue" = "" # An empty string indicates no named pipes can be accessed anonymously.
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck087([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.087"
+        "CIS Name"      = "Network Security: Allow PKU2U authentication requests to this computer to use online identities"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\pku2u"
+        "ValueName"     = "AllowOnlineID"
+        "ExpectedValue" = "0" # Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+
+# Existing functions from newbasescript.txt
+Function BaseLineCheck1([string]$CheckName) {
+    # Dummy Compliance Check
+    $Expected = "Expected Dummy Output"
+    $ReturnCode = 0
+    $ReturnResult = "What was found in the Check"
+    $ErrorMessage = "Error if Any"
+    # Example: Testing for a Registry:
+    $REGPATH = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+    $REGKEY = "AutoAdminLogon"
+    $CONDITIONBASE = "" # Expected value in registry for compliance
+    try {
+        if (RegKeyExists -RegistryPath $REGPATH -PropertyName $REGKEY) {
+            $RegistryValueFound = Get-ItemProperty -Path $REGPATH -Name $REGKEY
+            if ($RegistryValueFound -eq $CONDITIONBASE) {
+                $ReturnCode = 0
+            } else {
+                $ReturnCode = 1
+                $ErrorMessage ="Registry key $REGKEY is NOT compliant. Found: $ReturnResult, Expected: $CONDITIONBASE"
+            }
+        } else {
+            $ErrorMessage = "Registry key $REGKEY does not exist."
+            $ReturnCode = 1
+            $ReturnResult = "Not Found"
+        }
+    } catch {
+        $ReturnCode = 1
+        $ErrorMessage = "An error occurred while checking the registry key: $($_.Message)"
+    } finally {
+        <#Do this after the try block regardless of whether an exception occurred or not#>
+    }
+    #Compliance Dictionary
+    $tmpPermCheckResults = @{}
+    $tmpPermCheckResults["sExpectedValue"] = $Expected
+    $tmpPermCheckResults["sReturnValue"] = $ReturnResult
+    $tmpPermCheckResults["bIsCompliant"] = $ReturnCode
+    $tmpPermCheckResults["sErrorMessage"] = $ErrorMessage
+    return $tmpPermCheckResults
+}
+
+Function BaseLineCheck128([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.128"
+        "CIS Name"      = "AUDIT ACCOUNT LOCKOUT"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "ACCOUNT LOCKOUT"
+        "CategoryGUID"  = "0CCE9232-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success and Failure"
+        "ComparisonType" = "Equal"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Valued for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck129([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.129"
+        "CIS Name"      = "AUDIT GROUP MEMBERSHIP"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "GROUP MEMBERSHIP"
+        "CategoryGUID"  = "0CCE9249-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Valued for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck130([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.130"
+        "CIS Name"      = "AUDIT LOGOFF"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "Logoff"
+        "CategoryGUID"  = "0CCE9216-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Valued for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck127([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.127"
+        "CIS Name"      = "AUDIT PROCESS CREATION"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "Process Creation"
+        "CategoryGUID"  = "0CCE922B-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Valued for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck126([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.126"
+        "CIS Name"      = "AUDIT PNP ACTIVITY"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "PNP Activity"
+        "CategoryGUID"  = "0CCE9212-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck125([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.125"
+        "CIS Name"      = "AUDIT USER ACCOUNT MANAGEMENT"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "User Account Management"
+        "CategoryGUID"  = "0CCE9234-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success and Failure"
+        "ComparisonType" = "Equal"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck124([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.124"
+        "CIS Name"      = "AUDIT SECURITY GROUP MANAGEMENT"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "Security Group Management"
+        "CategoryGUID"  = "0CCE9237-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck123([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.123"
+        "CIS Name"      = "AUDIT APPLICATION GROUP MANAGEMENT"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "Application Group Management"
+        "CategoryGUID"  = "0CCE9239-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success and Failure"
+        "ComparisonType" = "Equal"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck122([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.122"
+        "CIS Name"      = "AUDIT CREDENTIAL VALIDATION"
+        "CheckType"     = "AuditPol"
+        "AuditCategory" = "Credential Validation"
+        "CategoryGUID"  = "0CCE9235-69AE-11D9-BED3-505054503030"
+        "ExpectedValue" = "Success"
+        "ComparisonType" = "Match"
+    }
+    $ComplianceValues = Test-AuditPol -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck121([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.121"
+        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: LOG SUCCESSFUL CONNECTIONS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
+        "ValueName"     = "LogSuccessfulConnections"
+        "ExpectedValue" = "1"
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck120([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.120"
+        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: LOG DROPPED PACKETS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
+        "ValueName"     = "LogDroppedPackets"
+        "ExpectedValue" = "1"
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck119([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.119"
+        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: SIZE LIMIT (KB)"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
+        "ValueName"     = "LogFileSize"
+        "ExpectedValue" = "16384"
+        "MustExist"     = $true
+        "Comparator"    = ">="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+#####################################################
+#                   Main Script                     #
+#####################################################
+Get-ServerInfo
+ExecuteAudits
+
