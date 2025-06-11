@@ -1,0 +1,26 @@
+Here are the four milestones for resolving the issue:
+Milestones for Resolving Server Flagging Issue (4 Milestones)
+Milestone 1: Exception Request and Detailed Technical Planning
+ * Objective: Secure formal approval for the necessary exception and conduct a thorough technical analysis of the required firewall rules and their impact.
+ * Key Activities:
+   * Submit and obtain DRD/Exception approval for the affected Windows servers (ILHCWV4140G038W, CPPVWAOOA3274, CPPVWAOOA3275, ILHCEV4150G008W, ILHCEV4150Ge57W, ILHCEV4150G039W) related to oID-38173, 38167 & 38685.
+   * Gather detailed technical requirements for the firewall rules to enable communication with the certificate authority on RDP Port 3389.
+   * Identify potential dependencies or impacts on existing services (e.g., MDT application).
+Milestone 2: Firewall Rule Design, Review, and Scheduling
+ * Objective: Develop the precise firewall rule configurations and get them reviewed and approved by all relevant stakeholders, followed by scheduling the implementation.
+ * Key Activities:
+   * Design the specific inbound/outbound firewall rules for all 6 identified servers (4 Lab, 2 Prod).
+   * Conduct internal and external reviews (e.g., with network security, AD team) of the proposed firewall rules to ensure correctness and adherence to policies.
+   * Finalize the implementation schedule, confirming the readiness for the planned change on 06/26.
+Milestone 3: Firewall Rule Implementation and Connectivity Validation
+ * Objective: Deploy the approved firewall rules and verify that the servers can successfully communicate with the certificate authority.
+ * Key Activities:
+   * Implement the approved firewall rules on all identified Windows servers.
+   * Perform immediate connectivity tests to confirm that the servers can reach the certificate authority via RDP Port 3389.
+   * Verify that existing critical functionalities (like MDT application operations) are not negatively impacted by the new rules.
+Milestone 4: Certificate Deployment, Flag Remediation, and Documentation
+ * Objective: Ensure new certificates are successfully deployed and installed, the oID flags are cleared, and document the entire resolution process.
+ * Key Activities:
+   * Monitor and confirm the automatic deployment and successful installation of new RDP certificates on all affected servers.
+   * Verify that the oID-38173, 38167 & 38685 flags are officially cleared for all 6 servers.
+   * Create comprehensive documentation of the implemented firewall rules, certificate deployment process, and the overall resolution of the issue.
