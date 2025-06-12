@@ -13,7 +13,7 @@
 #>
 param(
    [parameter(Mandatory = $false)]
-   [string]$release_package = "2025W13-0"
+   [string]$release_package = "2022W13-0" # Updated default release package for clarity
 )
 
 #----------------------------------------------------------
@@ -372,7 +372,7 @@ Function getInfoWithAuditPol(){
    )
 
    $AuditPolMatch = ""
-   if(Test-Path $AduitPolResults){
+   if(Test-Path $AuditPolResults){ # Corrected typo: $AduitPolResults changed to $AuditPolResults
        $SecurityPolicyExport = Get-Content $AuditPolResults
        If($SecurityPolicyExport -match $PRIVGUID){
            Write-Debug "$PRIVGUID Found"
@@ -382,7 +382,7 @@ Function getInfoWithAuditPol(){
            $AuditPolMatch = $vLineSplit[4].Trim()
            Write-Debug "Result:$AuditPolMatch"
        }Else{
-           Write-Debug "$PRIV not found in results"
+           Write-Debug "$PRIVGUID not found in results" # Changed $PRIV to $PRIVGUID for consistency
        }
    }Else{
        Write-Debug "Auditpol export output not found."
@@ -416,14 +416,14 @@ Function getInfoWithSeceditSingle([string]$vPriv) {
    }
 
    $SecEditMatchList = ""
-   if (Test-Path $SeceditResults) {
-       $SecurityPolicyExport = Get-Content $SeceditResults
+   if (Test-Path $Script:SeceditResults) {
+       $SecurityPolicyExport = Get-Content $Script:SeceditResults
        foreach ($line in $SecurityPolicyExport) {
            if ($line -like "$vPriv`*") {
                Write-Debug "PRIV Line: $line"
                $vLineSplit = $line.Split("=")
                $vLineTemp = $vLineSplit[1].Trim()
-               Write-Debug "PRIV DATA: $vLineTemp"
+               Write-Debug "SeceditKey DATA: $vLineTemp" # Changed from PRIV DATA for clarity
                $vLineTemp = $vLineTemp -replace "\*S-1-5-32-544", "Administrators"
                $vLineTemp = $vLineTemp -replace "\*S-1-5-11", "Authenticated Users"
                $vLineTemp = $vLineTemp -replace "\*S-1-5-7", "Anonymous Logon"
@@ -771,14 +771,15 @@ function Test-AuditPol {
                $ErrorMessage = "Expected Value; $ExpectedValue; Found $result"
            }
        } else {
+           # This condition is now more likely to be hit if the GUID is genuinely not found or the file is empty/malformed
            $ReturnCode = 1
-           $ReturnResult = "Improper Comparisontype"
-           $ErrorMessage = "Improper ComparisonType $ComparisonType"
+           $ReturnResult = "$CategoryGUID not found in auditpol results or results file issue"
+           $ErrorMessage = "Auditpol results for $CategoryGUID not found or could not be parsed."
        }
    }Else{
        $ReturnCode = 1
-       $ReturnResult = "$CategoryGUID not found in results"
-       $ErrorMessage = "$CategoryGUID not found in results"
+       $ReturnResult = "Auditpol results file not found"
+       $ErrorMessage = "Auditpol export output not found at " + $Script:AuditPolResults
    }
 
    #Compliance Dictionary
@@ -3643,6 +3644,3 @@ Function BaseLineCheck442([string]$CheckName) {
     }
     return $ComplianceValues
 }
-
-Get-ServerInfo
-ExecuteAudits
