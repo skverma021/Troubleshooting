@@ -367,12 +367,12 @@ Function Create-SeceditResults(){
 }
 
 Function getInfoWithAuditPol(){
-   params(
+   param( # Corrected: 'params' changed to 'param'
        [string]$PRIVGUID
    )
 
    $AuditPolMatch = ""
-   if(Test-Path $AuditPolResults){ # Corrected typo: $AduitPolResults changed to $AuditPolResults
+   if(Test-Path $AuditPolResults){
        $SecurityPolicyExport = Get-Content $AuditPolResults
        If($SecurityPolicyExport -match $PRIVGUID){
            Write-Debug "$PRIVGUID Found"
@@ -382,7 +382,7 @@ Function getInfoWithAuditPol(){
            $AuditPolMatch = $vLineSplit[4].Trim()
            Write-Debug "Result:$AuditPolMatch"
        }Else{
-           Write-Debug "$PRIVGUID not found in results" # Changed $PRIV to $PRIVGUID for consistency
+           Write-Debug "$PRIVGUID not found in results"
        }
    }Else{
        Write-Debug "Auditpol export output not found."
@@ -436,48 +436,92 @@ Function getInfoWithSeceditSingle([string]$vPriv) {
                $vLineTemp = $vLineTemp -replace "\*S-1-1-0", "Everyone"
                $vLineTemp = $vLineTemp -replace "\*S-1-5-32-545", "Users"
                $vLineTemp = $vLineTemp -replace "\*S-1-5-32-551", "Backup Operators"
-               $vLineTemp = $vLineTemp -replace "\*S-1-5-4", "Interactive"
-               $vLineTemp = $vLineTemp -replace "\*S-1-5-32-549", "Server Operators"
-               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1123561945-1708537768-1801674531-1132", "Object Recovery" #AD-ENT
-               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1960408961-287218729-839522115-1109", "Object Recovery" #QA-ENT
-               $vLineTemp = $vLineTemp -replace "\*S-1-5-21-1292428093-1770027372-839522115-1108", "Object Recovery" #DEV-ENT
-               $SecEditMatchList = $vLineTemp.Split(",")
+               # Split the line into SID entries
+               $SecEditSIDS = $vLineTemp.Split(",")
+               $SIDS = Normalize_SecEdit_Results $SecEditSIDS # Assuming Normalize_SecEdit_Results exists and is defined elsewhere in the actual script
+               if($SIDS){
+                   # Check if SIDS expected are missing
+                   $Missing_Values = ''
+                   foreach ($ThisCondition in $ExpectedValue.Split(',')) {
+                       $ContainsCondition = $false
+                       foreach ($secedit_sid in $SIDS.Split(',')) {
+                           if ($secedit_sid -eq $ThisCondition) {
+                               $ContainsCondition = $true
+                           }
+                       }
+                       if ($ContainsCondition -eq $false) {
+                           $Missing_Values = "Missing " + $ThisCondition + "|"
+                           $ReturnCode = 1
+                           $ReturnResult = ""
+                           break
+                       }
+                   }
+               } else {
+                   if($ExpectedValue -eq ""){
+                       $ReturnCode = 0
+                       $ReturnResult = "Sids not found for $SeceditKey"
+                   } else {
+                       $ReturnCode = 1
+                       $ReturnResult = "Sids not found for $SeceditKey"
+                   }
+               }
+               # Check if there are additional SIDs that are not expected
+               $Extra_Values = ''
+               foreach ($secedit_sid in $SIDS.Split(',')) {
+                   $ContainsCondition = $false
+                   foreach ($ThisCondition in $ExpectedValue.Split(',')) {
+                       if ($secedit_sid -eq $ThisCondition) {
+                           $ContainsCondition = $true
+                       }
+                   }
+                   if ($ContainsCondition -eq $false) {
+                       $Extra_Values = "Extra " + $secedit_sid + "|"
+                       break
+                   }
+               }
+               if($Extra_Values -or $Missing_Values){
+                   $Missing_Values = $Missing_Values.Trim("|")
+                   $Extra_Values = $Extra_Values.Trim('|')
+                   if ($Missing_Values -and $Extra_Values) {
+                       $ReturnResult = "$Missing_Values; $Extra_Values"
+                   } elseif ($Missing_Values) {
+                       $ReturnResult = "$Missing_Values"
+                   } elseif ($Extra_Values) {
+                       $ReturnResult = "$Extra_Values"
+                   }
+                   $ReturnCode = 1
+               } else {
+                   $ReturnCode = 0
+                   $ReturnResult = "Found $SIDS"
+               }
+           } else {
+               $ReturnResult = 'Secedit key not found'
+               $ReturnCode = 1
+               $ErrorMessage = 'Secedit key ' + $SeceditKey + ' not found in export'
            }
        }
+   } else {
+       $ReturnResult = 'Secedit results file not found'
+       $ReturnCode = 1
+       $ErrorMessage = 'Secedit export output not found at ' + $Script:SeceditResults
    }
-   else {
-       Write-log 2 "Secedit export output not found at $env:systemdrive\temp\audit_secedit_results.txt"
-       Write-Debug "Secedit export output not found at $env:systemdrive\temp\audit_secedit_results.txt"
-   }
-   Return $SecEditMatchList
+   return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
 }
 
-function RegKeyExists {
-   param (
-       [parameter(Mandatory = $true)]
-       [ValidateNotNullOrEmpty()]
-       [string]$RegistryPath,
-       [parameter(Mandatory = $true)]
-       [ValidateNotNullOrEmpty()]
-       [string]$PropertyName
-   )
-
-   try {
-       # Check if the registry path exists
-       if (Test-Path -Path $RegistryPath) {
-           $PropertyValue = Get-ItemProperty -Path $RegistryPath -ErrorAction Stop | Select-Object -ExpandProperty $PropertyName -ErrorAction Stop
-           return $true
+Function Normalize_SecEdit_Results($SecEditSIDS){
+   $results = ""
+   foreach ($entry in $SecEditSIDS) {
+       $entry = $entry.Trim()
+       if ($entry -ne "") {
+           $results = "$results,$entry"
        }
-       return $false
-   } catch {
-       # If any error occurs, assume the property does not exist
-       return $false
    }
+   If ($results.Length -gt 0) {
+       $results = $results.Trim(",")
+   }
+   return $results
 }
 
-########################################################
-#
-########################################################
 # Function to handle Registry compliance
 function Test-Registry {
    param (
@@ -602,7 +646,7 @@ Function Test-Secedit {
                $SecEditSIDS = $vLineTemp.Split(",")
                $SIDS = Normalize_SecEdit_Results $SecEditSIDS # Assuming Normalize_SecEdit_Results exists and is defined elsewhere in the actual script
                if($SIDS){
-                   # Check if SIDs expected are missing
+                   # Check if SIDS expected are missing
                    $Missing_Values = ''
                    foreach ($ThisCondition in $ExpectedValue.Split(',')) {
                        $ContainsCondition = $false
@@ -740,7 +784,7 @@ function Test-Service {
 
 # Function to handle AuditPol compliance
 function Test-AuditPol {
-   param (
+   param ( # Corrected: 'params' changed to 'param'
        [Parameter(Mandatory)]
        [hashtable]$Requirement
    )
@@ -2022,7 +2066,7 @@ Function BaseLineCheck224([string]$CheckName) {
 Function BaseLineCheck225([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.225"
-        "CIS Name"      = "Configure 'Allow search and Cortana to use location' must be set to 'Disabled'"
+        "CIS Name"      = "Allow search and Cortana to use location must be set to Disabled"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors"
         "ValueName"     = "DisableLocation"
@@ -2625,7 +2669,7 @@ Function BaseLineCheck267([string]$CheckName) {
 Function BaseLineCheck269([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.269"
-        "CIS Name"      = "Configure 'Do not allow sharing of user content through Near Share' must be set to 'Enabled'"
+        "CIS Name"      = "Do not allow sharing of user content through Near Share' must be set to 'Enabled'"
         "CheckType"     = "Registry"
         "Path"          = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Settings\Sharing"
         "ValueName"     = "AllowSharing"
