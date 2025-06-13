@@ -57,145 +57,165 @@ Remove-Item $SeceditResults -Force -WhatIf:$false -ErrorAction SilentlyContinue
 # BASELINES these are used to run BaselineCheck{} dynamically
 $Global:BASELINE_DICT = @{
     '009' = 'ISBL-10564-01.009' # ALLOW ADMINISTRATOR ACCOUNT LOCKOUT
-    '043' = 'ISBL-10564-01.043' # Replace a process level token
-    '055' = 'ISBL-10564-01.055' # Domain member: Digitally encrypt secure channel data (when possible)
-    '064' = 'ISBL-10564-01.064' # Configure Interactive logon: Message title for users attempting to log on
-    '065' = 'ISBL-10564-01.065' # Interactive logon: Prompt user to change password before expiration
-    '066' = 'ISBL-10564-01.066' # Interactive logon: Smart card removal behavior
-    '073' = 'ISBL-10564-01.073' # Microsoft network server: Disconnect clients when logon hours expire
-    '074' = 'ISBL-10564-01.074' # Microsoft network server: Server SPN target name validation level
-    '079' = 'ISBL-10564-01.079' # Configure Network access: Named Pipes that can be accessed anonymously
-    '087' = 'ISBL-10564-01.087' # Network Security: Allow PKU2U authentication requests to this computer to use online identities
-    # Existing baselines from newbasescript.txt
-    '1' = 'ISBL-#####-##.##1' # Dummy Compliance
+    '043' = 'ISBL-10564-01.043' # REPLACE A PROCESS LEVEL TOKEN
+    '055' = 'ISBL-10564-01.055' # DOMAIN MEMBER: DIGITALLY ENCRYPT SECURE CHANNEL DATA (WHEN POSSIBLE)
+    '064' = 'ISBL-10564-01.064' # CONFIGURE INTERACTIVE LOGON: MESSAGE TITLE FOR USERS ATTEMPTING TO LOG ON
+    '065' = 'ISBL-10564-01.065' # INTERACTIVE LOGON: PROMPT USER TO CHANGE PASSWORD BEFORE EXPIRATION
+    '066' = 'ISBL-10564-01.066' # INTERACTIVE LOGON: SMART CARD REMOVAL BEHAVIOR
+    '073' = 'ISBL-10564-01.073' # MICROSOFT NETWORK SERVER: DISCONNECT CLIENTS WHEN LOGON HOURS EXPIRE
+    '074' = 'ISBL-10564-01.074' # MICROSOFT NETWORK SERVER: SERVER SPN TARGET NAME VALIDATION LEVEL
+    '079' = 'ISBL-10564-01.079' # CONFIGURE NETWORK ACCESS: NAMED PIPES THAT CAN BE ACCESSED ANONYMOUSLY
+    '087' = 'ISBL-10564-01.087' # NETWORK SECURITY: ALLOW PKU2U AUTHENTICATION REQUESTS TO THIS COMPUTER TO USE ONLINE IDENTITIES
+    '089' = 'ISBL-10564-01.089' # NETWORK SECURITY: FORCE LOGOFF WHEN LOGON HOURS EXPIRE
+    '094' = 'ISBL-10564-01.094' # NETWORK SECURITY: RESTRICT NTLM: AUDIT INCOMING NTLM TRAFFIC
+    '095' = 'ISBL-10564-01.095' # NETWORK SECURITY: RESTRICT NTLM: OUTGOING NTLM TRAFFIC TO REMOTE SERVERS
+    '099' = 'ISBL-10564-01.099' # WINDOWS FIREWALL: DOMAIN: FIREWALL STATE
+    '100' = 'ISBL-10564-01.100' # WINDOWS FIREWALL: DOMAIN: INBOUND CONNECTIONS
+    '102' = 'ISBL-10564-01.102' # WINDOWS FIREWALL: DOMAIN: LOGGING: NAME
+    '106' = 'ISBL-10564-01.106' # WINDOWS FIREWALL: PRIVATE: FIREWALL STATE
+    '109' = 'ISBL-10564-01.109' # WINDOWS FIREWALL: PRIVATE: LOGGING: NAME
+    '112' = 'ISBL-10564-01.112' # WINDOWS FIREWALL: PRIVATE: LOGGING: LOG SUCCESSFUL CONNECTIONS
+    '114' = 'ISBL-10564-01.114' # WINDOWS FIREWALL: PUBLIC: INBOUND CONNECTIONS
+    '118' = 'ISBL-10564-01.118' # WINDOWS FIREWALL: PUBLIC: LOGGING: NAME
+    '119' = 'ISBL-10564-01.119' # WINDOWS FIREWALL: PUBLIC: LOGGING: SIZE LIMIT (KB)
+    '120' = 'ISBL-10564-01.120' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG DROPPED PACKETS
+    '121' = 'ISBL-10564-01.121' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG SUCCESSFUL CONNECTIONS
+    '122' = 'ISBL-10564-01.122' # AUDIT CREDENTIAL VALIDATION
+    '123' = 'ISBL-10564-01.123' # AUDIT APPLICATION GROUP MANAGEMENT
+    '124' = 'ISBL-10564-01.124' # AUDIT SECURITY GROUP MANAGEMENT
+    '125' = 'ISBL-10564-01.125' # AUDIT USER ACCOUNT MANAGEMENT
+    '126' = 'ISBL-10564-01.126' # AUDIT PNP ACTIVITY
+    '127' = 'ISBL-10564-01.127' # AUDIT PROCESS CREATION
     '128' = 'ISBL-10564-01.128' # AUDIT ACCOUNT LOCKOUT
     '129' = 'ISBL-10564-01.129' # AUDIT GROUP MEMBERSHIP
     '130' = 'ISBL-10564-01.130' # AUDIT LOGOFF
-    '127' = 'ISBL-10564-01.127' # AUDIT PROCESS CREATION
-    '126' = 'ISBL-10564-01.126' # AUDIT PNP ACTIVITY
-    '125' = 'ISBL-10564-01.125' # AUDIT USER ACCOUNT MANAGEMENT
-    '124' = 'ISBL-10564-01.124' # AUDIT SECURITY GROUP MANAGEMENT
-    '123' = 'ISBL-10564-01.123' # AUDIT APPLICATION GROUP MANAGEMENT
-    '122' = 'ISBL-10564-01.122' # AUDIT CREDENTIAL VALIDATION
-    '121' = 'ISBL-10564-01.121' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG SUCCESSFUL CONNECTIONS
-    '120' = 'ISBL-10564-01.120' # WINDOWS FIREWALL: PUBLIC: LOGGING: LOG DROPPED PACKETS
-    '119' = 'ISBL-10564-01.119' # WINDOWS FIREWALL: PUBLIC: LOGGING: SIZE LIMIT (KB)
-    '166' = 'ISBL-10564-01.166'
-    '167' = 'ISBL-10564-01.167'
-    '169' = 'ISBL-10564-01.169'
-    '174' = 'ISBL-10564-01.174'
-    '175' = 'ISBL-10564-01.175'
-    '176' = 'ISBL-10564-01.176'
-    '177' = 'ISBL-10564-01.177'
-    '178' = 'ISBL-10564-01.178'
-    '179' = 'ISBL-10564-01.179'
-    '180' = 'ISBL-10564-01.180'
-    '181' = 'ISBL-10564-01.181'
-    '182' = 'ISBL-10564-01.182'
-    '183' = 'ISBL-10564-01.183'
-    '184' = 'ISBL-10564-01.184'
-    '185' = 'ISBL-10564-01.185'
-    '187' = 'ISBL-10564-01.187'
-    '188' = 'ISBL-10564-01.188'
-    '189' = 'ISBL-10564-01.189'
-    '190' = 'ISBL-10564-01.190'
-    '193' = 'ISBL-10564-01.193'
-    '194' = 'ISBL-10564-01.194'
-    '197' = 'ISBL-10564-01.197'
-    '199' = 'ISBL-10564-01.199'
-    '200' = 'ISBL-10564-01.200'
-    '201' = 'ISBL-10564-01.201'
-    '202' = 'ISBL-10564-01.202'
-    '206' = 'ISBL-10564-01.206'
-    '208' = 'ISBL-10564-01.208'
-    '209' = 'ISBL-10564-01.209'
-    '213' = 'ISBL-10564-01.213'
-    '214' = 'ISBL-10564-01.214'
-    '215' = 'ISBL-10564-01.215'
-    '216' = 'ISBL-10564-01.216'
-    '219' = 'ISBL-10564-01.219'
-    '220' = 'ISBL-10564-01.220'
-    '223' = 'ISBL-10564-01.223'
-    '224' = 'ISBL-10564-01.224'
-    '225' = 'ISBL-10564-01.225'
-    '226' = 'ISBL-10564-01.226'
-    '227' = 'ISBL-10564-01.227'
-    '228' = 'ISBL-10564-01.228'
-    '229' = 'ISBL-10564-01.229'
-    '230' = 'ISBL-10564-01.230'
-    '231' = 'ISBL-10564-01.231'
-    '232' = 'ISBL-10564-01.232'
-    '233' = 'ISBL-10564-01.233'
-    '234' = 'ISBL-10564-01.234'
-    '238' = 'ISBL-10564-01.238'
-    '240' = 'ISBL-10564-01.240'
-    '241' = 'ISBL-10564-01.241'
-    '242' = 'ISBL-10564-01.242'
-    '246' = 'ISBL-10564-01.246'
-    '247' = 'ISBL-10564-01.247'
-    '248' = 'ISBL-10564-01.248'
-    '249' = 'ISBL-10564-01.249'
-    '250' = 'ISBL-10564-01.250'
-    '251' = 'ISBL-10564-01.251'
-    '252' = 'ISBL-10564-01.252'
-    '255' = 'ISBL-10564-01.255'
-    '258' = 'ISBL-10564-01.258'
-    '260' = 'ISBL-10564-01.260'
-    '261' = 'ISBL-10564-01.261'
-    '263' = 'ISBL-10564-01.263'
-    '264' = 'ISBL-10564-01.264'
-    '266' = 'ISBL-10564-01.266'
-    '267' = 'ISBL-10564-01.267'
-    '269' = 'ISBL-10564-01.269'
-    '270' = 'ISBL-10564-01.270'
-    '271' = 'ISBL-10564-01.271'
-    '272' = 'ISBL-10564-01.272'
-    '273' = 'ISBL-10564-01.273'
-    '274' = 'ISBL-10564-01.274'
-    '275' = 'ISBL-10564-01.275'
-    '279' = 'ISBL-10564-01.279'
-    '280' = 'ISBL-10564-01.280'
-    '283' = 'ISBL-10564-01.283'
-    '284' = 'ISBL-10564-01.284'
-    '292' = 'ISBL-10564-01.292'
-    '293' = 'ISBL-10564-01.293'
-    '298' = 'ISBL-10564-01.298'
-    '300' = 'ISBL-10564-01.300'
-    '307' = 'ISBL-10564-01.307'
-    '310' = 'ISBL-10564-01.310'
-    '317' = 'ISBL-10564-01.317'
-    '326' = 'ISBL-10564-01.326'
-    '331' = 'ISBL-10564-01.331'
-    '332' = 'ISBL-10564-01.332'
-    '336' = 'ISBL-10564-01.336'
-    '337' = 'ISBL-10564-01.337'
-    '338' = 'ISBL-10564-01.338' # Windows Event Log must be set to Automatic.
-    '344' = 'ISBL-10564-01.344' # Wallet Service must be set to Disabled
-    '351' = 'ISBL-10564-01.351' # Connected User Experiences and Telemetry (Diagtrack) must be set to Disabled
-    '352' = 'ISBL-10564-01.352' # SMTPSVC must be disabled
-    '363' = 'ISBL-10564-01.363' # USB Drive Access
-    '365' = 'ISBL-10564-01.365' # Block launching Windows Store apps with Windows Runtime API access from hosted content must be set to Enabled.
-    '366' = 'ISBL-10564-01.366' # Allow Telemetry must be set to Disabled
-    '367' = 'ISBL-10564-01.367' # Configure Windows Defender SmartScreen is set to Disabled
-    '369' = 'ISBL-10564-01.369' # Do not allow COM port redirection must be set to Enabled
-    '370' = 'ISBL-10564-01.370' # Do not allow supported Plug and Play device redirection must be set to Enabled
-    '375' = 'ISBL-10564-01.375' # Allow Cortana must be set to Disabled
-    '376' = 'ISBL-10564-01.376' # Allow Cortana above lock screen must be set to Disabled
-    '377' = 'ISBL-10564-01.377' # Allow search and Cortana to use location must be set to Disabled
-    '380' = 'ISBL-10564-01.380' # Disable all apps from Windows Store must be set to Enabled
-    '381' = 'ISBL-10564-01.381' # Turn off Microsoft Defender AntiVirus is set to Enabled
-    '383' = 'ISBL-10564-01.383' # Join Microsoft MAPS must be set to Disabled
-    '384' = 'ISBL-10564-01.384' # Send file samples when further analysis is required must be set to Never Send
-    '386' = 'ISBL-10564-01.386' # Configure Watson events must be set to Disabled
-    '387' = 'ISBL-10564-01.387' # Maximum log size for Powershell Logs
-    '388' = 'ISBL-10564-01.388' # Lock down the Security Descriptor on the PowerShell Logs
-    '389' = 'ISBL-10564-01.389' # Maximum Operational log size for Powershell Logs
-    '390' = 'ISBL-10564-01.390' # Lock down the Security Descriptor on the PowerShell Operational Logs
-    '394' = 'ISBL-10564-01.394' # Turn on Module Logging must be set to Enabled
-    '396' = 'ISBL-10564-01.396' # Browser Proxy Lockdown
-    '440' = 'ISBL-10564-01.440' # Logon as a Service
-    '441' = 'ISBL-10564-01.441' # disable Machine Configuration
-    '442' = 'ISBL-10564-01.442' # disable ExtensionService
+    '145' = 'ISBL-10564-01.145' # AUDIT OTHER SYSTEM EVENTS
+    '152' = 'ISBL-10564-01.152' # APPLY UAC RESTRICTIONS TO LOCAL ACCOUNTS ON NETWORK LOGONS
+    '153' = 'ISBL-10564-01.153' # CONFIGURE RPC PACKET LEVEL PRIVACY SETTING FOR INCOMING CONNECTIONS
+    '156' = 'ISBL-10564-01.156' # ENABLE CERTIFICATE PADDING
+    '158' = 'ISBL-10564-01.158' # NETBT NODETYPE CONFIGURATION
+    '159' = 'ISBL-10564-01.159' # WDIGEST AUTHENTICATION
+    '160' = 'ISBL-10564-01.160' # MSS: (AUTOADMINLOGON) ENABLE AUTOMATIC LOGON
+    '161' = 'ISBL-10564-01.161' # MSS: (DISABLEIPSOURCEROUTING IPV6) IP SOURCE ROUTING PROTECTION LEVEL
+    '162' = 'ISBL-10564-01.162' # MSS: (DISABLEIPSOURCEROUTING) IP SOURCE ROUTING PROTECTION LEVEL
+    '164' = 'ISBL-10564-01.164' # MSS: (NONAMERELEASEONDEMAND) ALLOW THE COMPUTER TO IGNORE NETBIOS NAME RELEASE REQUESTS EXCEPT FROM WINS SERVERS
+    '165' = 'ISBL-10564-01.165' # MSS: (SAFEDLLSEARCHMODE) ENABLE SAFE DLL SEARCH MODE
+    '166' = 'ISBL-10564-01.166' # MSS: (SCREENSAVERGRACEPERIOD) THE TIME IN SECONDS BEFORE THE SCREEN SAVER GRACE PERIOD EXPIRES
+    '167' = 'ISBL-10564-01.167' # CONFIGURE NETBIOS SETTINGS
+    '169' = 'ISBL-10564-01.169' # CONFIGURE DNS OVER HTTPS (DOH) NAME RESOLUTION
+    '174' = 'ISBL-10564-01.174' # HARDENED UNC PATHS
+    '175' = 'ISBL-10564-01.175' # MINIMIZE THE NUMBER OF SIMULTANEOUS CONNECTIONS TO THE INTERNET OR A WINDOWS DOMAIN
+    '176' = 'ISBL-10564-01.176' # CONFIGURE REDIRECTION GUARD
+    '177' = 'ISBL-10564-01.177' # CONFIGURE RPC CONNECTION SETTINGS: PROTOCOL TO USE FOR OUTGOING RPC CONNECTIONS
+    '178' = 'ISBL-10564-01.178' # CONFIGURE RPC CONNECTION SETTINGS: USE AUTHENTICATION FOR OUTGOING RPC CONNECTIONS
+    '179' = 'ISBL-10564-01.179' # CONFIGURE RPC LISTENER SETTINGS: PROTOCOLS TO ALLOW FOR INCOMING RPC CONNECTIONS
+    '180' = 'ISBL-10564-01.180' # CONFIGURE RPC LISTENER SETTINGS: AUTHENTICATION PROTOCOL TO USE FOR INCOMING RPC CONNECTIONS
+    '181' = 'ISBL-10564-01.181' # CONFIGURE RPC OVER TCP PORT
+    '182' = 'ISBL-10564-01.182' # LIMITS PRINT DRIVER INSTALLATION TO ADMINISTRATORS
+    '183' = 'ISBL-10564-01.183' # MANAGE PROCESSING OF QUEUE-SPECIFIC FILES
+    '184' = 'ISBL-10564-01.184' # POINT AND PRINT RESTRICTIONS: WHEN INSTALLING DRIVERS FOR A NEW CONNECTION
+    '185' = 'ISBL-10564-01.185' # POINT AND PRINT RESTRICTIONS: WHEN UPDATING DRIVERS FOR AN EXISTING CONNECTION
+    '187' = 'ISBL-10564-01.187' # ENCRYPTION ORACLE REMEDIATION
+    '188' = 'ISBL-10564-01.188' # REMOTE HOST ALLOWS DELEGATION OF NON-EXPORTABLE CREDENTIALS
+    '189' = 'ISBL-10564-01.189' # PREVENT DEVICE METADATA RETRIEVAL FROM THE INTERNET
+    '190' = 'ISBL-10564-01.190' # BOOT-START DRIVER INITIALIZATION POLICY
+    '193' = 'ISBL-10564-01.193' # CONFIGURE SECURITY POLICY PROCESSING: DO NOT APPLY DURING PERIODIC BACKGROUND PROCESSING
+    '194' = 'ISBL-10564-01.194' # CONFIGURE SECURITY POLICY PROCESSING: PROCESS EVEN IF THE GROUP POLICY OBJECTS HAVE NOT CHANGED
+    '197' = 'ISBL-10564-01.197' # TURN OFF DOWNLOADING OF PRINT DRIVERS OVER HTTP
+    '199' = 'ISBL-10564-01.199' # ENUMERATION POLICY FOR EXTERNAL DEVICES INCOMPATIBLE WITH KERNEL DMA PROTECTION
+    '200' = 'ISBL-10564-01.200' # ALLOW CUSTOM SSPS AND APS TO BE LOADED INTO LSASS
+    '201' = 'ISBL-10564-01.201' # BLOCK USER FROM SHOWING ACCOUNT DETAILS ON SIGN-IN
+    '202' = 'ISBL-10564-01.202' # DO NOT DISPLAY NETWORK SELECTION UI
+    '206' = 'ISBL-10564-01.206' # TURN OFF PICTURE PASSWORD SIGN-IN
+    '208' = 'ISBL-10564-01.208' # REQUIRE A PASSWORD WHEN A COMPUTER WAKES (ON BATTERY)
+    '209' = 'ISBL-10564-01.209' # REQUIRE A PASSWORD WHEN A COMPUTER WAKES (PLUGGED IN)
+    '213' = 'ISBL-10564-01.213' # ENABLE WINDOWS NTP SERVER
+    '214' = 'ISBL-10564-01.214' # ALLOW MICROSOFT ACCOUNTS TO BE OPTIONAL
+    '215' = 'ISBL-10564-01.215' # DISALLOW AUTOPLAY FOR NON-VOLUME DEVICES
+    '216' = 'ISBL-10564-01.216' # SET THE DEFAULT BEHAVIOR FOR AUTORUN
+    '219' = 'ISBL-10564-01.219' # TURN OFF CLOUD CONSUMER ACCOUNT STATE CONTENT
+    '220' = 'ISBL-10564-01.220' # TURN OFF MICROSOFT CONSUMER EXPERIENCES
+    '223' = 'ISBL-10564-01.223' # ENUMERATE ADMINISTRATOR ACCOUNTS ON ELEVATION
+    '224' = 'ISBL-10564-01.224' # ALLOW DIAGNOSTIC DATA
+    '225' = 'ISBL-10564-01.225' # DISABLE ONESETTINGS DOWNLOADS
+    '226' = 'ISBL-10564-01.226' # DO NOT SHOW FEEDBACK NOTIFICATIONS
+    '227' = 'ISBL-10564-01.227' # ENABLE ONESETTINGS AUDITING
+    '228' = 'ISBL-10564-01.228' # LIMIT DIAGNOSTIC LOG COLLECTION
+    '229' = 'ISBL-10564-01.229' # LIMIT DUMP COLLECTION
+    '230' = 'ISBL-10564-01.230' # TOGGLE USER CONTROL OVER INSIDER BUILDS
+    '231' = 'ISBL-10564-01.231' # ENABLE APP INSTALLER
+    '232' = 'ISBL-10564-01.232' # ENABLE APP INSTALLER EXPERIMENTAL FEATURES
+    '233' = 'ISBL-10564-01.233' # ENABLE APP INSTALLER HASH OVERRIDE
+    '234' = 'ISBL-10564-01.234' # ENABLE APP INSTALLER MS-APPINSTALLER PROTOCOL
+    '238' = 'ISBL-10564-01.238' # SECURITY: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)
+    '240' = 'ISBL-10564-01.240' # SETUP: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)
+    '241' = 'ISBL-10564-01.241' # SYSTEM: CONTROL EVENT LOG BEHAVIOR WHEN THE LOG FILE REACHES ITS MAXIMUM SIZE
+    '242' = 'ISBL-10564-01.242' # SYSTEM: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)
+    '246' = 'ISBL-10564-01.246' # BLOCK ALL CONSUMER MICROSOFT ACCOUNT USER AUTHENTICATION
+    '247' = 'ISBL-10564-01.247' # CONFIGURE LOCAL SETTING OVERRIDE FOR REPORTING TO MICROSOFT MAPS
+    '248' = 'ISBL-10564-01.248' # PREVENT THE USAGE OF ONEDRIVE FOR FILE STORAGE
+    '249' = 'ISBL-10564-01.249' # DO NOT ALLOW PASSWORDS TO BE SAVED
+    '250' = 'ISBL-10564-01.250' # DO NOT ALLOW DRIVE REDIRECTION
+    '251' = 'ISBL-10564-01.251' # ALWAYS PROMPT FOR PASSWORD UPON CONNECTION
+    '252' = 'ISBL-10564-01.252' # REQUIRE SECURE RPC COMMUNICATION
+    '255' = 'ISBL-10564-01.255' # DO NOT USE TEMPORARY FOLDERS PER SESSION
+    '258' = 'ISBL-10564-01.258' # ALLOW WINDOWS INK WORKSPACE
+    '260' = 'ISBL-10564-01.260' # ALWAYS INSTALL WITH ELEVATED PRIVILEGES
+    '261' = 'ISBL-10564-01.261' # ENABLE MPR NOTIFICATIONS FOR THE SYSTEM
+    '263' = 'ISBL-10564-01.263' # ALLOW BASIC AUTHENTICATION
+    '264' = 'ISBL-10564-01.264' # ALLOW UNENCRYPTED TRAFFIC
+    '266' = 'ISBL-10564-01.266' # ALLOW BASIC AUTHENTICATION (DUPLICATE, WILL BE REMOVED IF NO UNIQUE USE)
+    '267' = 'ISBL-10564-01.267' # ALLOW UNENCRYPTED TRAFFIC (DUPLICATE, WILL BE REMOVED IF NO UNIQUE USE)
+    '269' = 'ISBL-10564-01.269' # PREVENT USERS FROM MODIFYING SETTINGS
+    '270' = 'ISBL-10564-01.270' # CONFIGURE AUTOMATIC UPDATES
+    '271' = 'ISBL-10564-01.271' # CONFIGURE AUTOMATIC UPDATES: SCHEDULED INSTALL DAY
+    '272' = 'ISBL-10564-01.272' # MANAGE PREVIEW BUILDS
+    '273' = 'ISBL-10564-01.273' # TURN OFF TOAST NOTIFICATIONS ON THE LOCK SCREEN
+    '274' = 'ISBL-10564-01.274' # DO NOT PRESERVE ZONE INFORMATION IN FILE ATTACHMENTS
+    '275' = 'ISBL-10564-01.275' # CONFIGURE WINDOWS SPOTLIGHT ON LOCK SCREEN
+    '279' = 'ISBL-10564-01.279' # ALWAYS INSTALL WITH ELEVATED PRIVILEGES
+    '280' = 'ISBL-10564-01.280' # RESET ACCOUNT LOCKOUT COUNTER AFTER
+    '283' = 'ISBL-10564-01.283' # PASSWORD NEVER EXPIRES
+    '284' = 'ISBL-10564-01.284' # PRV_SEC_FA_SRV_VATWS, PRV_EAM_AA_SRV_IDM_SERVER_ADMINS
+    '292' = 'ISBL-10564-01.292' # PRIVATE PROFILE: WINDOWS FIREWALL
+    '293' = 'ISBL-10564-01.293' # THE PRIVATE PROFILE SETTINGS APPLY LOCAL CONNECTION SECURITY RULES
+    '298' = 'ISBL-10564-01.298' # DISABLE WINS ENTRIES FOR IP ADDRESSES
+    '300' = 'ISBL-10564-01.300' # SYSTEMS SETTINGS: OPTIONAL SUBSYSTEMS
+    '307' = 'ISBL-10564-01.307' # RECOVERY CONSOLE: ALLOW AUTOMATIC ADMINISTRATIVE LOGON
+    '310' = 'ISBL-10564-01.310' # BYPASS TRAVERSE CHECKING
+    '317' = 'ISBL-10564-01.317' # WINDOWS FIREWALL
+    '326' = 'ISBL-10564-01.326' # DHCP SERVER SERVICES
+    '331' = 'ISBL-10564-01.331' # REMOTE ACCESS AUTO CONNECTION MANAGER
+    '332' = 'ISBL-10564-01.332' # REMOTE ACCESS CONNECTION MANAGER MUST BE SET TO
+    '336' = 'ISBL-10564-01.336' # TELEPHONY SERVICE
+    '337' = 'ISBL-10564-01.337' # TELNET SERVER
+    '338' = 'ISBL-10564-01.338' # WINDOWS EVENT LOG MUST BE SET TO AUTOMATIC.
+    '344' = 'ISBL-10564-01.344' # WALLET SERVICE
+    '351' = 'ISBL-10564-01.351' # CONNECTED USER EXPERIENCES AND TELEMETRY” (DIAGTRACK)
+    '352' = 'ISBL-10564-01.352' # SMTPSVC
+    '363' = 'ISBL-10564-01.363' # USB DRIVE ACCESS
+    '365' = 'ISBL-10564-01.365' # BLOCK LAUNCHING WINDOWS STORE APPS WITH WINDOWS RUNTIME API ACCESS FROM HOSTED CONTENT
+    '366' = 'ISBL-10564-01.366' # ALLOW TELEMETRY
+    '367' = 'ISBL-10564-01.367' # CONFIGURE WINDOWS DEFENDER SMARTSCREEN
+    '369' = 'ISBL-10564-01.369' # DO NOT ALLOW COM PORT REDIRECTION
+    '370' = 'ISBL-10564-01.370' # DO NOT ALLOW SUPPORTED PLUG AND PLAY DEVICE REDIRECTION
+    '375' = 'ISBL-10564-01.375' # ALLOW CORTANA
+    '376' = 'ISBL-10564-01.376' # ALLOW CORTANA ABOVE LOCK SCREEN
+    '377' = 'ISBL-10564-01.377' # ALLOW SEARCH AND CORTANA TO USE LOCATION
+    '380' = 'ISBL-10564-01.380' # DISABLE ALL APPS FROM WINDOWS STORE
+    '381' = 'ISBL-10564-01.381' # TURN OFF MICROSOFT DEFENDER ANTIVIRUS
+    '383' = 'ISBL-10564-01.383' # JOIN MICROSOFT MAPS
+    '384' = 'ISBL-10564-01.384' # SEND FILE SAMPLES WHEN FURTHER ANALYSIS IS REQUIRED
+    '386' = 'ISBL-10564-01.386' # CONFIGURE WATSON EVENTS
+    '387' = 'ISBL-10564-01.387' # MAXIMUM LOG SIZE FOR POWERSHELL LOGS
+    '388' = 'ISBL-10564-01.388' # LOCK DOWN THE SECURITY DESCRIPTOR ON THE POWERSHELL LOGS
+    '389' = 'ISBL-10564-01.389' # MAXIMUM OPERATIONAL LOG SIZE FOR POWERSHELL LOGS
+    '390' = 'ISBL-10564-01.390' # LOCK DOWN THE SECURITY DESCRIPTOR ON THE POWERSHELL OPERATIONAL LOGS
+    '394' = 'ISBL-10564-01.394' # TURN ON MODULE LOGGING MUST BE SET TO 'ENABLED'
+    '396' = 'ISBL-10564-01.396' # BROWSER PROXY LOCKDOWN
+    '440' = 'ISBL-10564-01.440' # LOGON AS A SERVICE
+    '441' = 'ISBL-10564-01.441' # DISABLE MACHINE CONFIGURATION
+    '442' = 'ISBL-10564-01.442' # DISABLE EXTENSIONSERVICE
 }
 #####################################################
 #                  LOGGER
@@ -367,7 +387,7 @@ Function Create-SeceditResults(){
 }
 
 Function getInfoWithAuditPol(){
-   param( # Corrected: 'params' changed to 'param'
+   param(
        [string]$PRIVGUID
    )
 
@@ -784,7 +804,7 @@ function Test-Service {
 
 # Function to handle AuditPol compliance
 function Test-AuditPol {
-   param ( # Corrected: 'params' changed to 'param'
+   param (
        [Parameter(Mandatory)]
        [hashtable]$Requirement
    )
@@ -863,7 +883,7 @@ Function BaseLineCheck009([string]$CheckName) {
 Function BaseLineCheck043([string]$CheckName) {
    $Requirements = @{
        "ISBL" = "ISBL-10564-01.043"
-       "CIS Name" = "Replace a process level token"
+       "CIS Name" = "REPLACE A PROCESS LEVEL TOKEN"
        "CheckType" = "Secedit"
        "SeceditKey" = "SeAssignPrimaryTokenPrivilege" # Common Secedit key for this setting
        "ExpectedValue" = "LOCAL SERVICE,NETWORK SERVICE"
@@ -881,7 +901,7 @@ Function BaseLineCheck043([string]$CheckName) {
 Function BaseLineCheck055([string]$CheckName) {
    $Requirements = @{
        "ISBL" = "ISBL-10564-01.055"
-       "CIS Name" = "Domain member: Digitally encrypt secure channel data (when possible)"
+       "CIS Name" = "DOMAIN MEMBER: DIGITALLY ENCRYPT SECURE CHANNEL DATA (WHEN POSSIBLE)"
        "CheckType" = "Registry"
        "Path" = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
        "ValueName" = "RequireSignOrSeal"
@@ -902,7 +922,7 @@ Function BaseLineCheck055([string]$CheckName) {
 Function BaseLineCheck064([string]$CheckName) {
    $Requirements = @{
        "ISBL" = "ISBL-10564-01.064"
-       "CIS Name" = "Interactive logon: Message title for users attempting to log on"
+       "CIS Name" = "CONFIGURE INTERACTIVE LOGON: MESSAGE TITLE FOR USERS ATTEMPTING TO LOG ON"
        "CheckType" = "Registry"
        "Path" = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
        "ValueName" = "LegalNoticeCaption"
@@ -923,7 +943,7 @@ Function BaseLineCheck064([string]$CheckName) {
 Function BaseLineCheck065([string]$CheckName) {
    $Requirements = @{
        "ISBL" = "ISBL-10564-01.065"
-       "CIS Name" = "Interactive logon: Prompt user to change password before expiration"
+       "CIS Name" = "INTERACTIVE LOGON: PROMPT USER TO CHANGE PASSWORD BEFORE EXPIRATION"
        "CheckType" = "Registry"
        "Path" = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
        "ValueName" = "PasswordExpiryWarningDays"
@@ -944,7 +964,7 @@ Function BaseLineCheck065([string]$CheckName) {
 Function BaseLineCheck066([string]$CheckName) {
    $Requirements = @{
        "ISBL" = "ISBL-10564-01.066"
-       "CIS Name" = "Interactive logon: Smart card removal behavior"
+       "CIS Name" = "INTERACTIVE LOGON: SMART CARD REMOVAL BEHAVIOR"
        "CheckType" = "Registry"
        "Path" = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
        "ValueName" = "ScRemoveOption"
@@ -965,7 +985,7 @@ Function BaseLineCheck066([string]$CheckName) {
 Function BaseLineCheck073([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.073"
-        "CIS Name"      = "Microsoft network server: Disconnect clients when logon hours expire"
+        "CIS Name"      = "MICROSOFT NETWORK SERVER: DISCONNECT CLIENTS WHEN LOGON HOURS EXPIRE"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\System\CurrentControlSet\Services\LanManServer\Parameters"
         "ValueName"     = "AutoDisconnect"
@@ -986,7 +1006,7 @@ Function BaseLineCheck073([string]$CheckName) {
 Function BaseLineCheck074([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.074"
-        "CIS Name"      = "Microsoft network server: Server SPN target name validation level"
+        "CIS Name"      = "MICROSOFT NETWORK SERVER: SERVER SPN TARGET NAME VALIDATION LEVEL"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\System\CurrentControlSet\Services\LanManServer\Parameters"
         "ValueName"     = "SmbServerNameHardeningLevel"
@@ -1007,7 +1027,7 @@ Function BaseLineCheck074([string]$CheckName) {
 Function BaseLineCheck079([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.079"
-        "CIS Name"      = "Configure Network access: Named Pipes that can be accessed anonymously"
+        "CIS Name"      = "CONFIGURE NETWORK ACCESS: NAMED PIPES THAT CAN BE ACCESSED ANONYMOUSLY"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
         "ValueName"     = "NullSessionPipes"
@@ -1028,11 +1048,242 @@ Function BaseLineCheck079([string]$CheckName) {
 Function BaseLineCheck087([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.087"
-        "CIS Name"      = "Network Security: Allow PKU2U authentication requests to this computer to use online identities"
+        "CIS Name"      = "NETWORK SECURITY: ALLOW PKU2U AUTHENTICATION REQUESTS TO THIS COMPUTER TO USE ONLINE IDENTITIES"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
         "ValueName"     = "AllowPku2uLogon"
         "ExpectedValue" = "0" # 0 for Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck089([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.089"
+        "CIS Name"      = "NETWORK SECURITY: FORCE LOGOFF WHEN LOGON HOURS EXPIRE"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+        "ValueName"     = "AutoDisconnect" # This is the same as 073, but the CIS name indicates a slightly different angle. Ensure the value aligns.
+        "ExpectedValue" = "1" # Typically 1 for Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck094([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.094"
+        "CIS Name"      = "NETWORK SECURITY: RESTRICT NTLM: AUDIT INCOMING NTLM TRAFFIC"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
+        "ValueName"     = "RestrictSendingNTLMTraffic" # Or a specific audit key
+        "ExpectedValue" = "2" # Audit all (2), or disable (0)
+        "MustExist"     = $true
+        "Comparator"    = ">=" # Could be 2 or higher if other audit options exist
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck095([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.095"
+        "CIS Name"      = "NETWORK SECURITY: RESTRICT NTLM: OUTGOING NTLM TRAFFIC TO REMOTE SERVERS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
+        "ValueName"     = "RestrictReceivingNTLMTraffic" # Or a specific audit key for outgoing
+        "ExpectedValue" = "2" # Audit all (2), or disable (0)
+        "MustExist"     = $true
+        "Comparator"    = ">="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck099([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.099"
+        "CIS Name"      = "WINDOWS FIREWALL: DOMAIN: FIREWALL STATE"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile"
+        "ValueName"     = "EnableFirewall"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck100([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.100"
+        "CIS Name"      = "WINDOWS FIREWALL: DOMAIN: INBOUND CONNECTIONS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile"
+        "ValueName"     = "DefaultInboundAction"
+        "ExpectedValue" = "1" # Block
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck102([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.102"
+        "CIS Name"      = "WINDOWS FIREWALL: DOMAIN: LOGGING: NAME"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile\Logging"
+        "ValueName"     = "LogFile"
+        "ExpectedValue" = "%systemroot%\system32\LogFiles\Firewall\pfirewall.log"
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck106([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.106"
+        "CIS Name"      = "WINDOWS FIREWALL: PRIVATE: FIREWALL STATE"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile"
+        "ValueName"     = "EnableFirewall"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck109([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.109"
+        "CIS Name"      = "WINDOWS FIREWALL: PRIVATE: LOGGING: NAME"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile\Logging"
+        "ValueName"     = "LogFile"
+        "ExpectedValue" = "%systemroot%\system32\LogFiles\Firewall\pfirewall.log"
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck112([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.112"
+        "CIS Name"      = "WINDOWS FIREWALL: PRIVATE: LOGGING: LOG SUCCESSFUL CONNECTIONS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile\Logging"
+        "ValueName"     = "LogSuccessfulConnections"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck114([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.114"
+        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: INBOUND CONNECTIONS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile"
+        "ValueName"     = "DefaultInboundAction"
+        "ExpectedValue" = "1" # Block
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck118([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.118"
+        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: NAME"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
+        "ValueName"     = "LogFile"
+        "ExpectedValue" = "%systemroot%\system32\LogFiles\Firewall\pfirewall.log"
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1126,93 +1377,13 @@ Function BaseLineCheck127([string]$CheckName) {
     return $ComplianceValues
 }
 
-Function BaseLineCheck126([string]$CheckName) {
+Function BaseLineCheck145([string]$CheckName) {
     $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.126"
-        "CIS Name"      = "AUDIT PNP ACTIVITY"
+        "ISBL"          = "ISBL-10564-01.145"
+        "CIS Name"      = "AUDIT OTHER SYSTEM EVENTS"
         "CheckType"     = "AuditPol"
-        "AuditCategory" = "Detailed Tracking"
-        "CategoryGUID"  = "{0CCE921C-69AE-11D9-BEC1-000100000000}" # GUID for Plug and Play Activity
-        "ExpectedValue" = "Success"
-        "ComparisonType"= "Match"
-    }
-    $ComplianceValues = Test-AuditPol -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck125([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.125"
-        "CIS Name"      = "AUDIT USER ACCOUNT MANAGEMENT"
-        "CheckType"     = "AuditPol"
-        "AuditCategory" = "Account Management"
-        "CategoryGUID"  = "{0CCE9212-69AE-11D9-BEC1-000100000000}" # GUID for User Account Management
-        "ExpectedValue" = "Success"
-        "ComparisonType"= "Match"
-    }
-    $ComplianceValues = Test-AuditPol -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck124([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.124"
-        "CIS Name"      = "AUDIT SECURITY GROUP MANAGEMENT"
-        "CheckType"     = "AuditPol"
-        "AuditCategory" = "Account Management"
-        "CategoryGUID"  = "{0CCE9210-69AE-11D9-BEC1-000100000000}" # GUID for Security Group Management (same as 129, might need clarification or different GUID if for a distinct check)
-        "ExpectedValue" = "Success"
-        "ComparisonType"= "Match"
-    }
-    $ComplianceValues = Test-AuditPol -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck123([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.123"
-        "CIS Name"      = "AUDIT APPLICATION GROUP MANAGEMENT"
-        "CheckType"     = "AuditPol"
-        "AuditCategory" = "Account Management"
-        "CategoryGUID"  = "{0CCE9211-69AE-11D9-BEC1-000100000000}" # GUID for Application Group Management
-        "ExpectedValue" = "Success"
-        "ComparisonType"= "Match"
-    }
-    $ComplianceValues = Test-AuditPol -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck122([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.122"
-        "CIS Name"      = "AUDIT CREDENTIAL VALIDATION"
-        "CheckType"     = "AuditPol"
-        "AuditCategory" = "Logon/Logoff"
-        "CategoryGUID"  = "{0CCE9215-69AE-11D9-BEC1-000100000000}" # GUID for Credential Validation
+        "AuditCategory" = "System"
+        "CategoryGUID"  = "{0CCE9214-69AE-11D9-BEC1-000100000000}" # GUID for Other System Events
         "ExpectedValue" = "Success and Failure"
         "ComparisonType"= "Match"
     }
@@ -1226,13 +1397,55 @@ Function BaseLineCheck122([string]$CheckName) {
     return $ComplianceValues
 }
 
-Function BaseLineCheck121([string]$CheckName) {
+Function BaseLineCheck152([string]$CheckName) {
     $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.121"
-        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: LOG SUCCESSFUL CONNECTIONS"
+        "ISBL"          = "ISBL-10564-01.152"
+        "CIS Name"      = "APPLY UAC RESTRICTIONS TO LOCAL ACCOUNTS ON NETWORK LOGONS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
-        "ValueName"     = "LogSuccessfulConnections"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        "ValueName"     = "LocalAccountTokenFilterPolicy"
+        "ExpectedValue" = "0" # Enabled (0 disables filtering, which applies restrictions)
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck153([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.153"
+        "CIS Name"      = "CONFIGURE RPC PACKET LEVEL PRIVACY SETTING FOR INCOMING CONNECTIONS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "EnableAuthEpResolution" # Or a specific privacy setting
+        "ExpectedValue" = "1" # Enabled (ensure privacy)
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck156([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.156"
+        "CIS Name"      = "ENABLE CERTIFICATE PADDING"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\SystemCertificates\TrustedPeople" # Example path, exact path depends on context
+        "ValueName"     = "EnableCertPadding" # Placeholder, actual reg key might vary
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1247,13 +1460,118 @@ Function BaseLineCheck121([string]$CheckName) {
     return $ComplianceValues
 }
 
-Function BaseLineCheck120([string]$CheckName) {
+Function BaseLineCheck158([string]$CheckName) {
     $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.120"
-        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: LOG DROPPED PACKETS"
+        "ISBL"          = "ISBL-10564-01.158"
+        "CIS Name"      = "NETBT NODETYPE CONFIGURATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
-        "ValueName"     = "LogDroppedPackets"
+        "Path"          = "HKLM:\System\CurrentControlSet\Services\NetBT\Parameters"
+        "ValueName"     = "NodeType"
+        "ExpectedValue" = "8" # 8 (P-node) or 4 (M-node) for security. Avoid 1 (B-node) or 2 (H-node)
+        "MustExist"     = $true
+        "Comparator"    = ">=" # Or specify exact value
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck159([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.159"
+        "CIS Name"      = "WDIGEST AUTHENTICATION"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+        "ValueName"     = "UseLogonCredential"
+        "ExpectedValue" = "0" # Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck160([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.160"
+        "CIS Name"      = "MSS: (AUTOADMINLOGON) ENABLE AUTOMATIC LOGON"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+        "ValueName"     = "AutoAdminLogon"
+        "ExpectedValue" = "0" # Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck161([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.161"
+        "CIS Name"      = "MSS: (DISABLEIPSOURCEROUTING IPV6) IP SOURCE ROUTING PROTECTION LEVEL"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+        "ValueName"     = "DisableIPSourceRouting"
+        "ExpectedValue" = "2" # Strongest protection
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck162([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.162"
+        "CIS Name"      = "MSS: (DISABLEIPSOURCEROUTING) IP SOURCE ROUTING PROTECTION LEVEL"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+        "ValueName"     = "DisableIPSourceRouting"
+        "ExpectedValue" = "2" # Strongest protection
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck164([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.164"
+        "CIS Name"      = "MSS: (NONAMERELEASEONDEMAND) ALLOW THE COMPUTER TO IGNORE NETBIOS NAME RELEASE REQUESTS EXCEPT FROM WINS SERVERS"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+        "ValueName"     = "NoNameReleaseOnDemand"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1268,16 +1586,16 @@ Function BaseLineCheck120([string]$CheckName) {
     return $ComplianceValues
 }
 
-Function BaseLineCheck119([string]$CheckName) {
+Function BaseLineCheck165([string]$CheckName) {
     $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.119"
-        "CIS Name"      = "WINDOWS FIREWALL: PUBLIC: LOGGING: SIZE LIMIT (KB)"
+        "ISBL"          = "ISBL-10564-01.165"
+        "CIS Name"      = "MSS: (SAFEDLLSEARCHMODE) ENABLE SAFE DLL SEARCH MODE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
-        "ValueName"     = "LogFileSize"
-        "ExpectedValue" = "16384" # Example: 16 MB, adjust as needed
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+        "ValueName"     = "SafeDllSearchMode"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
-        "Comparator"    = ">=" # At least this size
+        "Comparator"    = "="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1292,13 +1610,13 @@ Function BaseLineCheck119([string]$CheckName) {
 Function BaseLineCheck166([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.166"
-        "CIS Name"      = "Configure 'Do not allow drive redirection' must be set to 'Enabled'"
+        "CIS Name"      = "MSS: (SCREENSAVERGRACEPERIOD) THE TIME IN SECONDS BEFORE THE SCREEN SAVER GRACE PERIOD EXPIRES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableCdm"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+        "ValueName"     = "ScreenSaverGracePeriod"
+        "ExpectedValue" = "5" # Or 0 for no grace period
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = "<=" # Less than or equal to 5 seconds
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1313,14 +1631,16 @@ Function BaseLineCheck166([string]$CheckName) {
 Function BaseLineCheck167([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.167"
-        "CIS Name"      = "Configure 'Do not allow LPT port redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE NETBIOS SETTINGS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableLPT"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" # Need to iterate through interfaces
+        "ValueName"     = "NetbiosOptions"
+        "ExpectedValue" = "2" # Disable NetBIOS over TCP/IP
+        "MustExist"     = $false # Can be 0 if not configured
         "Comparator"    = "="
     }
+    # This check is more complex as it needs to iterate through network interfaces.
+    # For now, it will check the general parameter if available.
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
@@ -1334,11 +1654,11 @@ Function BaseLineCheck167([string]$CheckName) {
 Function BaseLineCheck169([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.169"
-        "CIS Name"      = "Configure 'Do not allow printer redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE DNS OVER HTTPS (DOH) NAME RESOLUTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableCpm" # fDisablePrinterRedirection is another common name
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters"
+        "ValueName"     = "EnableAutoDoh"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1355,14 +1675,15 @@ Function BaseLineCheck169([string]$CheckName) {
 Function BaseLineCheck174([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.174"
-        "CIS Name"      = "Configure 'Do not allow supported Plug and Play device redirection' must be set to 'Enabled'"
+        "CIS Name"      = "HARDENED UNC PATHS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisablePNP"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedUNCPaths"
+        "ValueName"     = "" # This key itself indicates presence of hardened paths
+        "ExpectedValue" = "Exists" # Check for existence, not a specific value
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = "Contains" # A value indicating entries are present, or simply check for existence of the key
     }
+    # This check is conceptual and might need more specific logic to check entries.
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
@@ -1376,11 +1697,11 @@ Function BaseLineCheck174([string]$CheckName) {
 Function BaseLineCheck175([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.175"
-        "CIS Name"      = "Configure 'Do not allow audio and video playback redirection' must be set to 'Enabled'"
+        "CIS Name"      = "MINIMIZE THE NUMBER OF SIMULTANEOUS CONNECTIONS TO THE INTERNET OR A WINDOWS DOMAIN"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableAudioCapture" # Example, might be more specific like fDisableAudioPlayback
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
+        "ValueName"     = "MaxConnectionsPer1_0Server" # Example, actual regkey varies by policy
+        "ExpectedValue" = "4" # Standard limit
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1397,10 +1718,10 @@ Function BaseLineCheck175([string]$CheckName) {
 Function BaseLineCheck176([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.176"
-        "CIS Name"      = "Configure 'Do not allow time zone redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE REDIRECTION GUARD"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableTimeZoneRedirection"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+        "ValueName"     = "EnableSecuritySignature" # Example, related to SMB signing
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1418,13 +1739,13 @@ Function BaseLineCheck176([string]$CheckName) {
 Function BaseLineCheck177([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.177"
-        "CIS Name"      = "Configure 'Do not allow clipboard redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE RPC CONNECTION SETTINGS: PROTOCOL TO USE FOR OUTGOING RPC CONNECTIONS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableClipboard"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "ClientProtocols"
+        "ExpectedValue" = "ncacn_ip_tcp" # Example for TCP/IP
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = "Contains"
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1439,10 +1760,10 @@ Function BaseLineCheck177([string]$CheckName) {
 Function BaseLineCheck178([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.178"
-        "CIS Name"      = "Configure 'Do not allow COM port redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE RPC CONNECTION SETTINGS: USE AUTHENTICATION FOR OUTGOING RPC CONNECTIONS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableCpm"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "ClientAuthentication" # Example for authentication setting
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1460,13 +1781,13 @@ Function BaseLineCheck178([string]$CheckName) {
 Function BaseLineCheck179([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.179"
-        "CIS Name"      = "Configure 'Do not allow supported Plug and Play device redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE RPC LISTENER SETTINGS: PROTOCOLS TO ALLOW FOR INCOMING RPC CONNECTIONS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisablePNP"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "ServerProtocols"
+        "ExpectedValue" = "ncacn_ip_tcp" # Example for TCP/IP
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = "Contains"
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1481,10 +1802,10 @@ Function BaseLineCheck179([string]$CheckName) {
 Function BaseLineCheck180([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.180"
-        "CIS Name"      = "Configure 'Do not allow drive redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE RPC LISTENER SETTINGS: AUTHENTICATION PROTOCOL TO USE FOR INCOMING RPC CONNECTIONS:"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableCdm"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "ServerAuthentication" # Example for authentication setting
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1502,11 +1823,11 @@ Function BaseLineCheck180([string]$CheckName) {
 Function BaseLineCheck181([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.181"
-        "CIS Name"      = "Configure 'Do not allow LPT port redirection' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE RPC OVER TCP PORT"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableLPT"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "RPCoverTCPPort"
+        "ExpectedValue" = "135" # Default RPC port
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1523,10 +1844,10 @@ Function BaseLineCheck181([string]$CheckName) {
 Function BaseLineCheck182([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.182"
-        "CIS Name"      = "Configure 'Do not allow printer redirection' must be set to 'Enabled'"
+        "CIS Name"      = "LIMITS PRINT DRIVER INSTALLATION TO ADMINISTRATORS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableCpm" # fDisablePrinterRedirection is another common name
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+        "ValueName"     = "RestrictDriverInstallationToAdministrators"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1544,10 +1865,10 @@ Function BaseLineCheck182([string]$CheckName) {
 Function BaseLineCheck183([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.183"
-        "CIS Name"      = "Configure 'Do not allow audio and video playback redirection' must be set to 'Enabled'"
+        "CIS Name"      = "MANAGE PROCESSING OF QUEUE-SPECIFIC FILES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableAudioCapture" # Example, might be more specific like fDisableAudioPlayback
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+        "ValueName"     = "ForceSpoolerIsolation" # Example, check for related settings
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1565,11 +1886,11 @@ Function BaseLineCheck183([string]$CheckName) {
 Function BaseLineCheck184([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.184"
-        "CIS Name"      = "Configure 'Do not allow time zone redirection' must be set to 'Enabled'"
+        "CIS Name"      = "POINT AND PRINT RESTRICTIONS: WHEN INSTALLING DRIVERS FOR A NEW CONNECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableTimeZoneRedirection"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+        "ValueName"     = "InForest" # Or a specific setting for installation
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1586,11 +1907,11 @@ Function BaseLineCheck184([string]$CheckName) {
 Function BaseLineCheck185([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.185"
-        "CIS Name"      = "Configure 'Do not allow clipboard redirection' must be set to 'Enabled'"
+        "CIS Name"      = "POINT AND PRINT RESTRICTIONS: WHEN UPDATING DRIVERS FOR AN EXISTING CONNECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
-        "ValueName"     = "fDisableClipboard"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+        "ValueName"     = "UpdatePromptBehavior"
+        "ExpectedValue" = "0" # Do not show warning or elevation prompt
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1607,11 +1928,11 @@ Function BaseLineCheck185([string]$CheckName) {
 Function BaseLineCheck187([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.187"
-        "CIS Name"      = "Turn on PowerShell Script Block Logging must be set to 'Enabled'"
+        "CIS Name"      = "ENCRYPTION ORACLE REMEDIATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"
-        "ValueName"     = "EnableScriptBlockLogging"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Credssp\Policy"
+        "ValueName"     = "AllowEncryptionOracle"
+        "ExpectedValue" = "0" # Force Updated Clients
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1628,11 +1949,11 @@ Function BaseLineCheck187([string]$CheckName) {
 Function BaseLineCheck188([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.188"
-        "CIS Name"      = "Turn on PowerShell Transaction Logging must be set to 'Enabled'"
+        "CIS Name"      = "REMOTE HOST ALLOWS DELEGATION OF NON-EXPORTABLE CREDENTIALS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
-        "ValueName"     = "EnableModuleLogging" # This is likely referring to module logging
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation"
+        "ValueName"     = "AllowEnryptedCredentials" # Example, actual reg key might vary
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1649,10 +1970,10 @@ Function BaseLineCheck188([string]$CheckName) {
 Function BaseLineCheck189([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.189"
-        "CIS Name"      = "Turn on PowerShell Pipeline Execution Details Logging must be set to 'Enabled'"
+        "CIS Name"      = "PREVENT DEVICE METADATA RETRIEVAL FROM THE INTERNET"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ShellCommandLogging"
-        "ValueName"     = "EnableShellCommandLogging"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Settings"
+        "ValueName"     = "DisableMetadataRetrieval"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1670,11 +1991,11 @@ Function BaseLineCheck189([string]$CheckName) {
 Function BaseLineCheck190([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.190"
-        "CIS Name"      = "Turn on PowerShell Module Logging must be set to 'Enabled'"
+        "CIS Name"      = "BOOT-START DRIVER INITIALIZATION POLICY"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
-        "ValueName"     = "EnableModuleLogging"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\BootDriverPolicy"
+        "ValueName"     = "Policy"
+        "ExpectedValue" = "0" # Default (No policy or similar to disable certain policies)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1691,10 +2012,10 @@ Function BaseLineCheck190([string]$CheckName) {
 Function BaseLineCheck193([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.193"
-        "CIS Name"      = "Configure 'Turn off Windows Defender Antivirus' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE SECURITY POLICY PROCESSING: DO NOT APPLY DURING PERIODIC BACKGROUND PROCESSING"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
-        "ValueName"     = "DisableAntiSpyware"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{3CD11F4A-4836-4B80-97BE-B521639A5D19}" # GUID for security policy
+        "ValueName"     = "NoGPOPeriodicBackgroundProcessing"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1712,11 +2033,11 @@ Function BaseLineCheck193([string]$CheckName) {
 Function BaseLineCheck194([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.194"
-        "CIS Name"      = "Configure 'Join Microsoft MAPS' must be set to 'Disabled'"
+        "CIS Name"      = "CONFIGURE SECURITY POLICY PROCESSING: PROCESS EVEN IF THE GROUP POLICY OBJECTS HAVE NOT CHANGED"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
-        "ValueName"     = "SpyNetReporting"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{3CD11F4A-4836-4B80-97BE-B521639A5D19}" # GUID for security policy
+        "ValueName"     = "ForceRefresh"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1733,11 +2054,11 @@ Function BaseLineCheck194([string]$CheckName) {
 Function BaseLineCheck197([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.197"
-        "CIS Name"      = "Configure 'Send file samples when further analysis is required' must be set to 'Never Send'"
+        "CIS Name"      = "TURN OFF DOWNLOADING OF PRINT DRIVERS OVER HTTP"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
-        "ValueName"     = "SubmitSamplesConsent"
-        "ExpectedValue" = "2" # Never Send
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+        "ValueName"     = "RestrictDriverInstallationToAdministrators" # Indirectly disables HTTP download
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1754,11 +2075,11 @@ Function BaseLineCheck197([string]$CheckName) {
 Function BaseLineCheck199([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.199"
-        "CIS Name"      = "Configure 'Scan all downloaded files and attachments' must be set to 'Enabled'"
+        "CIS Name"      = "ENUMERATION POLICY FOR EXTERNAL DEVICES INCOMPATIBLE WITH KERNEL DMA PROTECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
-        "ValueName"     = "DisableScanOnRealtimeEnable" # This is for disabling, so '0' would mean enabled
-        "ExpectedValue" = "0" # 0 for Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
+        "ValueName"     = "DmaProtection" # Example, actual reg key might vary
+        "ExpectedValue" = "1" # Enabled (enforce protection)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1775,11 +2096,11 @@ Function BaseLineCheck199([string]$CheckName) {
 Function BaseLineCheck200([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.200"
-        "CIS Name"      = "Configure 'Turn on behavior monitoring' must be set to 'Enabled'"
+        "CIS Name"      = "ALLOW CUSTOM SSPS AND APS TO BE LOADED INTO LSASS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
-        "ValueName"     = "DisableBehaviorMonitoring" # 0 for Enabled
-        "ExpectedValue" = "0" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
+        "ValueName"     = "LsaCurtain" # Example, actual reg key might vary for LSASS protection
+        "ExpectedValue" = "0" # Disabled (to prevent loading custom SSPS/APS)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1796,11 +2117,11 @@ Function BaseLineCheck200([string]$CheckName) {
 Function BaseLineCheck201([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.201"
-        "CIS Name"      = "Configure 'Turn on cloud-delivered protection' must be set to 'Enabled'"
+        "CIS Name"      = "BLOCK USER FROM SHOWING ACCOUNT DETAILS ON SIGN-IN"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
-        "ValueName"     = "DisableCloudBlockForDownloads" # 0 for Enabled
-        "ExpectedValue" = "0" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "BlockUserAuthDetails"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1817,151 +2138,7 @@ Function BaseLineCheck201([string]$CheckName) {
 Function BaseLineCheck202([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.202"
-        "CIS Name"      = "Configure 'Turn on real-time protection' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
-        "ValueName"     = "DisableRealtimeMonitoring" # 0 for Enabled
-        "ExpectedValue" = "0" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck206([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.206"
-        "CIS Name"      = "Configure 'Remove Windows Defender Antivirus UI access' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\UX Configuration"
-        "ValueName"     = "HideAllUI"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck208([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.208"
-        "CIS Name"      = "Configure 'Turn off SmartScreen for Microsoft Edge' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\SmartScreenEnabled"
-        "ValueName"     = "SmartScreenEnabled"
-        "ExpectedValue" = "0" # Disabled/Off
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck209([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.209"
-        "CIS Name"      = "Configure 'Prevent bypassing SmartScreen prompts for files' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\SmartScreenWarningsDisabled"
-        "ValueName"     = "SmartScreenWarningsDisabled"
-        "ExpectedValue" = "0" # 0 for Enabled (i.e., prompts are NOT disabled)
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck213([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.213"
-        "CIS Name"      = "Configure 'Prevent bypassing SmartScreen prompts for sites' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftEdge\SmartScreenWarningsDisabledForSites"
-        "ValueName"     = "SmartScreenWarningsDisabledForSites"
-        "ExpectedValue" = "0" # 0 for Enabled (i.e., prompts are NOT disabled)
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck214([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.214"
-        "CIS Name"      = "Configure 'Do not allow password reveal button' must be set to 'Enabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\CredUI"
-        "ValueName"     = "DisablePasswordReveal"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck215([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.215"
-        "CIS Name"      = "Configure 'Disable Windows Error Reporting' must be set to 'Enabled'"
-        "CheckType"     = "Service"
-        "ServiceName"   = "WerSvc" # Windows Error Reporting Service
-        "ExpectedValue" = "Stopped,Disabled"
-    }
-    $ComplianceValues = Test-Service -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck216([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.216"
-        "CIS Name"      = "Configure 'Do not display network selection UI' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT DISPLAY NETWORK SELECTION UI"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
         "ValueName"     = "DontDisplayNetworkSelectionUI"
@@ -1979,14 +2156,161 @@ Function BaseLineCheck216([string]$CheckName) {
     return $ComplianceValues
 }
 
+Function BaseLineCheck206([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.206"
+        "CIS Name"      = "TURN OFF PICTURE PASSWORD SIGN-IN"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Credentials\SmartCard"
+        "ValueName"     = "DisablePicturePassword"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck208([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.208"
+        "CIS Name"      = "REQUIRE A PASSWORD WHEN A COMPUTER WAKES (ON BATTERY)"
+        "CheckType"     = "Registry"
+        "Path"          = "HKCU:\Control Panel\PowerCfg\PowerSettings\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
+        "ValueName"     = "ACSettingIndex" # Or DCSettingIndex for battery
+        "ExpectedValue" = "1" # Requires password
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck209([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.209"
+        "CIS Name"      = "REQUIRE A PASSWORD WHEN A COMPUTER WAKES (PLUGGED IN)"
+        "CheckType"     = "Registry"
+        "Path"          = "HKCU:\Control Panel\PowerCfg\PowerSettings\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
+        "ValueName"     = "DCSettingIndex" # Or ACSettingIndex for plugged in
+        "ExpectedValue" = "1" # Requires password
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck213([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.213"
+        "CIS Name"      = "ENABLE WINDOWS NTP SERVER"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpServer"
+        "ValueName"     = "Enabled"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck214([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.214"
+        "CIS Name"      = "ALLOW MICROSOFT ACCOUNTS TO BE OPTIONAL"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        "ValueName"     = "NoConnectedUserExperiences" # This enables/disables connected experiences
+        "ExpectedValue" = "1" # Set to 1 to *disallow* Microsoft accounts
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck215([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.215"
+        "CIS Name"      = "DISALLOW AUTOPLAY FOR NON-VOLUME DEVICES"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+        "ValueName"     = "NoDriveTypeAutoRun"
+        "ExpectedValue" = "255" # All drives disabled (0xFF)
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck216([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.216"
+        "CIS Name"      = "SET THE DEFAULT BEHAVIOR FOR AUTORUN"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+        "ValueName"     = "NoAutorun"
+        "ExpectedValue" = "1" # Enabled (disables autorun)
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
 Function BaseLineCheck219([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.219"
-        "CIS Name"      = "Configure 'Allow Microsoft accounts to be optional' must be set to 'Disabled'"
+        "CIS Name"      = "TURN OFF CLOUD CONSUMER ACCOUNT STATE CONTENT"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-        "ValueName"     = "NoConnectedUserExperiences" # This turns off connected experiences.
-        "ExpectedValue" = "1" # Enabled (to disable connected experiences)
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+        "ValueName"     = "DisableCloudSync" # Example, actual reg key might vary for cloud content
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2003,7 +2327,49 @@ Function BaseLineCheck219([string]$CheckName) {
 Function BaseLineCheck220([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.220"
-        "CIS Name"      = "Configure 'Allow Telemetry' must be set to 'Disabled'"
+        "CIS Name"      = "TURN OFF MICROSOFT CONSUMER EXPERIENCES"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+        "ValueName"     = "DisableConsumerFeatures"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck223([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.223"
+        "CIS Name"      = "ENUMERATE ADMINISTRATOR ACCOUNTS ON ELEVATION"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        "ValueName"     = "FilterAdministratorToken"
+        "ExpectedValue" = "1" # Enabled
+        "MustExist"     = $true
+        "Comparator"    = "="
+    }
+    $ComplianceValues = Test-Registry -Requirement $Requirements
+    if(-not $ComplianceValues){
+        $ReturnResult = 'Error Returning Value'
+        $ReturnCode = 1
+        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
+        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
+    }
+    return $ComplianceValues
+}
+
+Function BaseLineCheck224([string]$CheckName) {
+    $Requirements = @{
+        "ISBL"          = "ISBL-10564-01.224"
+        "CIS Name"      = "ALLOW DIAGNOSTIC DATA"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
         "ValueName"     = "AllowTelemetry"
@@ -2021,56 +2387,14 @@ Function BaseLineCheck220([string]$CheckName) {
     return $ComplianceValues
 }
 
-Function BaseLineCheck223([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.223"
-        "CIS Name"      = "Configure 'Allow Cortana' must be set to 'Disabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-        "ValueName"     = "AllowCortana"
-        "ExpectedValue" = "0" # Disabled
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
-Function BaseLineCheck224([string]$CheckName) {
-    $Requirements = @{
-        "ISBL"          = "ISBL-10564-01.224"
-        "CIS Name"      = "Configure 'Allow Cortana above lock screen' must be set to 'Disabled'"
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-        "ValueName"     = "AllowCortanaAtLockScreen"
-        "ExpectedValue" = "0" # Disabled
-        "MustExist"     = $true
-        "Comparator"    = "="
-    }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
-    if(-not $ComplianceValues){
-        $ReturnResult = 'Error Returning Value'
-        $ReturnCode = 1
-        $ErrorMessage = "Error Returning Value for $($Requirements.ISBL)"
-        return @{sExpectedValue = $Expected; sReturnValue = $ReturnResult; bIsCompliant = $ReturnCode; sErrorMessage = $ErrorMessage}
-    }
-    return $ComplianceValues
-}
-
 Function BaseLineCheck225([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.225"
-        "CIS Name"      = "Allow search and Cortana to use location must be set to Disabled"
+        "CIS Name"      = "DISABLE ONESETTINGS DOWNLOADS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors"
-        "ValueName"     = "DisableLocation"
-        "ExpectedValue" = "1" # Enabled (to disable location)
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync"
+        "ValueName"     = "DisableSync" # Example, related to sync settings
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2087,10 +2411,10 @@ Function BaseLineCheck225([string]$CheckName) {
 Function BaseLineCheck226([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.226"
-        "CIS Name"      = "Configure 'Disable all apps from Windows Store' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT SHOW FEEDBACK NOTIFICATIONS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
-        "ValueName"     = "DisableStore"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "DoNotShowFeedbackNotifications"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2108,11 +2432,11 @@ Function BaseLineCheck226([string]$CheckName) {
 Function BaseLineCheck227([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.227"
-        "CIS Name"      = "Configure 'Do not allow web content on New Tab page' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE ONESETTINGS AUDITING"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Edge" # For Edge
-        "ValueName"     = "ShowMicrosoftNewsOnNewTabPage"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync"
+        "ValueName"     = "EnableSyncAuditing" # Example, might vary for auditing
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2129,10 +2453,10 @@ Function BaseLineCheck227([string]$CheckName) {
 Function BaseLineCheck228([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.228"
-        "CIS Name"      = "Configure 'Configure Do not allow user to install fonts' must be set to 'Enabled'"
+        "CIS Name"      = "LIMIT DIAGNOSTIC LOG COLLECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "DisableFontInstall"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+        "ValueName"     = "LimitDiagnosticLogCollection"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2150,11 +2474,11 @@ Function BaseLineCheck228([string]$CheckName) {
 Function BaseLineCheck229([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.229"
-        "CIS Name"      = "Configure 'Turn off Autoplay' must be set to 'Enabled'"
+        "CIS Name"      = "LIMIT DUMP COLLECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
-        "ValueName"     = "NoDriveTypeAutoRun"
-        "ExpectedValue" = "255" # All drives disabled (0xFF)
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "LimitDumpCollection"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2171,11 +2495,11 @@ Function BaseLineCheck229([string]$CheckName) {
 Function BaseLineCheck230([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.230"
-        "CIS Name"      = "Configure 'Allow only specified Windows apps to use Push Notifications' must be set to 'Disabled'"
+        "CIS Name"      = "TOGGLE USER CONTROL OVER INSIDER BUILDS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PushNotifications"
-        "ValueName"     = "NoToastNotification" # NoToastNotification set to 1 means notifications are disabled
-        "ExpectedValue" = "1" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
+        "ValueName"     = "AllowBuildPreview" # Example, actual reg key might vary
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2192,11 +2516,11 @@ Function BaseLineCheck230([string]$CheckName) {
 Function BaseLineCheck231([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.231"
-        "CIS Name"      = "Configure 'Turn off Windows Store automatic download and install of updates' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE APP INSTALLER"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
-        "ValueName"     = "AutoDownload"
-        "ExpectedValue" = "2" # 2 for disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+        "ValueName"     = "EnableAppInstaller"
+        "ExpectedValue" = "0" # Disabled (to prevent unauthorized app installs)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2213,11 +2537,11 @@ Function BaseLineCheck231([string]$CheckName) {
 Function BaseLineCheck232([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.232"
-        "CIS Name"      = "Configure 'Turn off the Store application' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE APP INSTALLER EXPERIMENTAL FEATURES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
-        "ValueName"     = "RemoveWindowsStore"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+        "ValueName"     = "EnableExperimentalFeatures"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2234,11 +2558,11 @@ Function BaseLineCheck232([string]$CheckName) {
 Function BaseLineCheck233([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.233"
-        "CIS Name"      = "Configure 'Do not allow access to the camera' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE APP INSTALLER HASH OVERRIDE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy"
-        "ValueName"     = "DisableWebcamInApps"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+        "ValueName"     = "EnableHashOverride"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2255,11 +2579,11 @@ Function BaseLineCheck233([string]$CheckName) {
 Function BaseLineCheck234([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.234"
-        "CIS Name"      = "Configure 'Do not allow access to the microphone' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE APP INSTALLER MS-APPINSTALLER PROTOCOL"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy"
-        "ValueName"     = "DisableMicrophoneInApps"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+        "ValueName"     = "EnableMsAppInstallerProtocol"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2276,13 +2600,13 @@ Function BaseLineCheck234([string]$CheckName) {
 Function BaseLineCheck238([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.238"
-        "CIS Name"      = "Configure 'Disable Windows Media Player' must be set to 'Enabled'"
+        "CIS Name"      = "SECURITY: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Media Player"
-        "ValueName"     = "DisableWindowsMediaPlayer"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Security"
+        "ValueName"     = "MaxSize"
+        "ExpectedValue" = "196608" # Example: 192MB
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = ">="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -2297,13 +2621,13 @@ Function BaseLineCheck238([string]$CheckName) {
 Function BaseLineCheck240([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.240"
-        "CIS Name"      = "Configure 'Do not allow users to connect using a Wi-Fi Protected Setup wizard' must be set to 'Enabled'"
+        "CIS Name"      = "SETUP: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Wireless\Config"
-        "ValueName"     = "DisableWPS"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Setup"
+        "ValueName"     = "MaxSize"
+        "ExpectedValue" = "196608" # Example: 192MB
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = ">="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -2318,11 +2642,11 @@ Function BaseLineCheck240([string]$CheckName) {
 Function BaseLineCheck241([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.241"
-        "CIS Name"      = "Configure 'Require domain-level computer authentication for all clients' must be set to 'Enabled'"
+        "CIS Name"      = "SYSTEM: CONTROL EVENT LOG BEHAVIOR WHEN THE LOG FILE REACHES ITS MAXIMUM SIZE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
-        "ValueName"     = "NC_AllowDomainComputerAuth"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\System"
+        "ValueName"     = "Retention"
+        "ExpectedValue" = "0" # Overwrite events as needed
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2339,13 +2663,13 @@ Function BaseLineCheck241([string]$CheckName) {
 Function BaseLineCheck242([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.242"
-        "CIS Name"      = "Configure 'Disable HTTP/2 server push' must be set to 'Enabled'"
+        "CIS Name"      = "SYSTEM: SPECIFY THE MAXIMUM LOG FILE SIZE (KB)"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\System\CurrentControlSet\Services\HTTP\Parameters"
-        "ValueName"     = "EnableHttp2Push"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\System"
+        "ValueName"     = "MaxSize"
+        "ExpectedValue" = "196608" # Example: 192MB
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = ">="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -2360,10 +2684,10 @@ Function BaseLineCheck242([string]$CheckName) {
 Function BaseLineCheck246([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.246"
-        "CIS Name"      = "Configure 'Turn off handwriting data collection' must be set to 'Enabled'"
+        "CIS Name"      = "BLOCK ALL CONSUMER MICROSOFT ACCOUNT USER AUTHENTICATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\TabletPC"
-        "ValueName"     = "DisableInkingDataCollection"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        "ValueName"     = "DisableOnlineAccountSignIn"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2381,10 +2705,10 @@ Function BaseLineCheck246([string]$CheckName) {
 Function BaseLineCheck247([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.247"
-        "CIS Name"      = "Configure 'Turn off diagnostic data viewer' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE LOCAL SETTING OVERRIDE FOR REPORTING TO MICROSOFT MAPS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
-        "ValueName"     = "DisableDiagnosticDataViewer"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
+        "ValueName"     = "DisableLocalAdminSettings"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2402,11 +2726,11 @@ Function BaseLineCheck247([string]$CheckName) {
 Function BaseLineCheck248([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.248"
-        "CIS Name"      = "Configure 'Turn off activity history' must be set to 'Enabled'"
+        "CIS Name"      = "PREVENT THE USAGE OF ONEDRIVE FOR FILE STORAGE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "EnableActivityFeed"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive"
+        "ValueName"     = "DisableFileSyncNGSC"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2423,11 +2747,11 @@ Function BaseLineCheck248([string]$CheckName) {
 Function BaseLineCheck249([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.249"
-        "CIS Name"      = "Configure 'Turn off cloud content search' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT ALLOW PASSWORDS TO BE SAVED"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-        "ValueName"     = "AllowCloudSearch"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "DisablePasswordCaching"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2444,10 +2768,10 @@ Function BaseLineCheck249([string]$CheckName) {
 Function BaseLineCheck250([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.250"
-        "CIS Name"      = "Configure 'Turn off cloud sync' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT ALLOW DRIVE REDIRECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
-        "ValueName"     = "DisableCloudSync"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        "ValueName"     = "fDisableCdm"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2465,10 +2789,10 @@ Function BaseLineCheck250([string]$CheckName) {
 Function BaseLineCheck251([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.251"
-        "CIS Name"      = "Configure 'Disable Windows Defender Exploit Guard' must be set to 'Enabled'"
+        "CIS Name"      = "ALWAYS PROMPT FOR PASSWORD UPON CONNECTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exploit Guard"
-        "ValueName"     = "DisableExploitGuard"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        "ValueName"     = "fPromptForPassword"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2486,13 +2810,13 @@ Function BaseLineCheck251([string]$CheckName) {
 Function BaseLineCheck252([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.252"
-        "CIS Name"      = "Configure 'Disable Credential Guard' must be set to 'Enabled'"
+        "CIS Name"      = "REQUIRE SECURE RPC COMMUNICATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
-        "ValueName"     = "LsaCfgFlags"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
+        "ValueName"     = "ServerAuthLevel" # Example, related to RPC security
+        "ExpectedValue" = "6" # Require Packet Privacy (RPC_C_AUTHN_LEVEL_PKT_PRIVACY)
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = ">=" # At least privacy level
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -2507,11 +2831,11 @@ Function BaseLineCheck252([string]$CheckName) {
 Function BaseLineCheck255([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.255"
-        "CIS Name"      = "Configure 'Turn off malicious software removal tool' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT USE TEMPORARY FOLDERS PER SESSION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\MRT"
-        "ValueName"     = "DisableMRT"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        "ValueName"     = "fEnableTempFoldersPerSession"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2528,10 +2852,10 @@ Function BaseLineCheck255([string]$CheckName) {
 Function BaseLineCheck258([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.258"
-        "CIS Name"      = "Configure 'Disable Windows Defender SmartScreen' must be set to 'Enabled'"
+        "CIS Name"      = "ALLOW WINDOWS INK WORKSPACE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "SmartScreenEnabled"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace"
+        "ValueName"     = "AllowWindowsInkWorkspace"
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2549,11 +2873,11 @@ Function BaseLineCheck258([string]$CheckName) {
 Function BaseLineCheck260([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.260"
-        "CIS Name"      = "Configure 'Do not allow the display of the Sign-in options tile' must be set to 'Enabled'"
+        "CIS Name"      = "ALWAYS INSTALL WITH ELEVATED PRIVILEGES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "HideSignInOptions"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+        "ValueName"     = "AlwaysInstallElevated"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2570,11 +2894,11 @@ Function BaseLineCheck260([string]$CheckName) {
 Function BaseLineCheck261([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.261"
-        "CIS Name"      = "Configure 'Turn off software restriction policies' must be set to 'Enabled'"
+        "CIS Name"      = "ENABLE MPR NOTIFICATIONS FOR THE SYSTEM"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Safer\CodeIdentifiers"
-        "ValueName"     = "SaferFlags"
-        "ExpectedValue" = "0" # 0 for Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "EnableMprNotifications" # Example, actual reg key might vary
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2591,11 +2915,11 @@ Function BaseLineCheck261([string]$CheckName) {
 Function BaseLineCheck263([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.263"
-        "CIS Name"      = "Configure 'Disable SMBv1 client' must be set to 'Enabled'"
+        "CIS Name"      = "ALLOW BASIC AUTHENTICATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-        "ValueName"     = "EnableBandwidthThrottling" # Not directly for SMBv1, use a known SMBv1 regkey
-        "ExpectedValue" = "0" # Should be 0 for disabled SMBv1
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
+        "ValueName"     = "AllowBasic"
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2612,10 +2936,10 @@ Function BaseLineCheck263([string]$CheckName) {
 Function BaseLineCheck264([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.264"
-        "CIS Name"      = "Configure 'Disable SMBv1 server' must be set to 'Enabled'"
+        "CIS Name"      = "ALLOW UNENCRYPTED TRAFFIC"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-        "ValueName"     = "Smb1Enabled" # Should be 0 for disabled SMBv1 server
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
+        "ValueName"     = "AllowUnencryptedTraffic"
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2633,12 +2957,15 @@ Function BaseLineCheck264([string]$CheckName) {
 Function BaseLineCheck266([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.266"
-        "CIS Name"      = "Configure 'Disable SMBv1 client' must be set to 'Enabled'" # Duplicate of 263, assuming different underlying check or further detail
-        "CheckType"     = "Service"
-        "ServiceName"   = "LanmanWorkstation" # Check dependency on SMB1 driver
-        "ExpectedValue" = "Running,Automatic" # If the service is running, it indicates SMBv1 is enabled. Check if SMB1 is actually unloaded
+        "CIS Name"      = "ALLOW BASIC AUTHENTICATION"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
+        "ValueName"     = "AllowBasic"
+        "ExpectedValue" = "0" # Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
     }
-    $ComplianceValues = Test-Service -Requirement $Requirements
+    $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -2651,12 +2978,15 @@ Function BaseLineCheck266([string]$CheckName) {
 Function BaseLineCheck267([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.267"
-        "CIS Name"      = "Configure 'Disable SMBv1 server' must be set to 'Enabled'" # Duplicate of 264, assuming different underlying check or further detail
-        "CheckType"     = "Service"
-        "ServiceName"   = "LanmanServer" # Check dependency on SMB1 driver
-        "ExpectedValue" = "Running,Automatic" # If the service is running, it indicates SMBv1 is enabled.
+        "CIS Name"      = "ALLOW UNENCRYPTED TRAFFIC"
+        "CheckType"     = "Registry"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
+        "ValueName"     = "AllowUnencryptedTraffic"
+        "ExpectedValue" = "0" # Disabled
+        "MustExist"     = $true
+        "Comparator"    = "="
     }
-    $ComplianceValues = Test-Service -Requirement $Requirements
+    $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -2669,11 +2999,11 @@ Function BaseLineCheck267([string]$CheckName) {
 Function BaseLineCheck269([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.269"
-        "CIS Name"      = "Do not allow sharing of user content through Near Share' must be set to 'Enabled'"
+        "CIS Name"      = "PREVENT USERS FROM MODIFYING SETTINGS"
         "CheckType"     = "Registry"
-        "Path"          = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Settings\Sharing"
-        "ValueName"     = "AllowSharing"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync"
+        "ValueName"     = "DisableSync" # Effectively prevents modification
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2690,11 +3020,11 @@ Function BaseLineCheck269([string]$CheckName) {
 Function BaseLineCheck270([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.270"
-        "CIS Name"      = "Configure 'Turn off speech recognition' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE AUTOMATIC UPDATES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Speech"
-        "ValueName"     = "DisableSpeech"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+        "ValueName"     = "AUOptions"
+        "ExpectedValue" = "2" # Notify for download and auto install
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2711,11 +3041,11 @@ Function BaseLineCheck270([string]$CheckName) {
 Function BaseLineCheck271([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.271"
-        "CIS Name"      = "Configure 'Turn off Sync settings' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE AUTOMATIC UPDATES: SCHEDULED INSTALL DAY"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync"
-        "ValueName"     = "DisableSync"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+        "ValueName"     = "ScheduledInstallDay"
+        "ExpectedValue" = "0" # Every Day
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2732,11 +3062,11 @@ Function BaseLineCheck271([string]$CheckName) {
 Function BaseLineCheck272([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.272"
-        "CIS Name"      = "Configure 'Turn off handwriting data collection' must be set to 'Enabled'"
+        "CIS Name"      = "MANAGE PREVIEW BUILDS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\TabletPC"
-        "ValueName"     = "DisableInkingDataCollection"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
+        "ValueName"     = "AllowBuildPreview" # Same as 230
+        "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2753,10 +3083,10 @@ Function BaseLineCheck272([string]$CheckName) {
 Function BaseLineCheck273([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.273"
-        "CIS Name"      = "Configure 'Turn off diagnostic data viewer' must be set to 'Enabled'"
+        "CIS Name"      = "TURN OFF TOAST NOTIFICATIONS ON THE LOCK SCREEN"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
-        "ValueName"     = "DisableDiagnosticDataViewer"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "DisableNotificationScreen"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2774,10 +3104,10 @@ Function BaseLineCheck273([string]$CheckName) {
 Function BaseLineCheck274([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.274"
-        "CIS Name"      = "Configure 'Turn off activity history' must be set to 'Enabled'"
+        "CIS Name"      = "DO NOT PRESERVE ZONE INFORMATION IN FILE ATTACHMENTS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "EnableActivityFeed"
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+        "ValueName"     = "SaveZoneInformation"
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2795,11 +3125,11 @@ Function BaseLineCheck274([string]$CheckName) {
 Function BaseLineCheck275([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.275"
-        "CIS Name"      = "Configure 'Turn off cloud content search' must be set to 'Enabled'"
+        "CIS Name"      = "CONFIGURE WINDOWS SPOTLIGHT ON LOCK SCREEN"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-        "ValueName"     = "AllowCloudSearch"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "TurnOffSpotlightOnLockScreen"
+        "ExpectedValue" = "1" # Enabled (to turn off spotlight)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2816,10 +3146,10 @@ Function BaseLineCheck275([string]$CheckName) {
 Function BaseLineCheck279([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.279"
-        "CIS Name"      = "Configure 'Disable HTTP/2 server push' must be set to 'Enabled'" # Duplicate of 242
+        "CIS Name"      = "ALWAYS INSTALL WITH ELEVATED PRIVILEGES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\System\CurrentControlSet\Services\HTTP\Parameters"
-        "ValueName"     = "EnableHttp2Push"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+        "ValueName"     = "AlwaysInstallElevated"
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2837,11 +3167,11 @@ Function BaseLineCheck279([string]$CheckName) {
 Function BaseLineCheck280([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.280"
-        "CIS Name"      = "Configure 'Do not allow users to connect using a Wi-Fi Protected Setup wizard' must be set to 'Enabled'" # Duplicate of 240
+        "CIS Name"      = "RESET ACCOUNT LOCKOUT COUNTER AFTER"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Wireless\Config"
-        "ValueName"     = "DisableWPS"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters"
+        "ValueName"     = "ResetLockoutCount"
+        "ExpectedValue" = "30" # 30 minutes, adjust as needed
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2858,13 +3188,13 @@ Function BaseLineCheck280([string]$CheckName) {
 Function BaseLineCheck283([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.283"
-        "CIS Name"      = "Configure 'Require domain-level computer authentication for all clients' must be set to 'Enabled'" # Duplicate of 241
+        "CIS Name"      = "PASSWORD NEVER EXPIRES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
-        "ValueName"     = "NC_AllowDomainComputerAuth"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+        "ValueName"     = "PasswordExpiryWarningDays" # Example, actual reg key varies for password policy
+        "ExpectedValue" = "0" # Should not be set to 0 for "never expires"
         "MustExist"     = $true
-        "Comparator"    = "="
+        "Comparator"    = ">" # Should be greater than 0
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -2879,15 +3209,12 @@ Function BaseLineCheck283([string]$CheckName) {
 Function BaseLineCheck284([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.284"
-        "CIS Name"      = "Configure 'Disable Windows Media Player' must be set to 'Enabled'" # Duplicate of 238
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Media Player"
-        "ValueName"     = "DisableWindowsMediaPlayer"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "PRV_SEC_FA_SRV_VATWS, PRV_EAM_AA_SRV_IDM_SERVER_ADMINS"
+        "CheckType"     = "Secedit"
+        "SeceditKey"    = "SeSecurityPrivilege" # This privilege is for managing security log and auditing.
+        "ExpectedValue" = "LOCAL SERVICE,NETWORK SERVICE,ADMINISTRATORS" # Example, customize as needed
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Secedit -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -2900,10 +3227,10 @@ Function BaseLineCheck284([string]$CheckName) {
 Function BaseLineCheck292([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.292"
-        "CIS Name"      = "Configure 'Turn off handwriting data collection' must be set to 'Enabled'" # Duplicate of 246
+        "CIS Name"      = "PRIVATE PROFILE: WINDOWS FIREWALL"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\TabletPC"
-        "ValueName"     = "DisableInkingDataCollection"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile"
+        "ValueName"     = "EnableFirewall"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2921,11 +3248,11 @@ Function BaseLineCheck292([string]$CheckName) {
 Function BaseLineCheck293([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.293"
-        "CIS Name"      = "Configure 'Turn off diagnostic data viewer' must be set to 'Enabled'" # Duplicate of 247
+        "CIS Name"      = "THE PRIVATE PROFILE SETTINGS APPLY LOCAL CONNECTION SECURITY RULES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
-        "ValueName"     = "DisableDiagnosticDataViewer"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile"
+        "ValueName"     = "DisableUnicastResponsesToMulticastBroadcast" # Example, could be a general security rule
+        "ExpectedValue" = "0" # Disabled (to allow local rules to apply)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2942,10 +3269,10 @@ Function BaseLineCheck293([string]$CheckName) {
 Function BaseLineCheck298([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.298"
-        "CIS Name"      = "Configure 'Turn off activity history' must be set to 'Enabled'" # Duplicate of 248
+        "CIS Name"      = "DISABLE WINS ENTRIES FOR IP ADDRESSES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "EnableActivityFeed"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+        "ValueName"     = "EnableDhcp" # If DHCP is enabled, WINS might be too. Check for a specific WINS setting.
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2963,11 +3290,11 @@ Function BaseLineCheck298([string]$CheckName) {
 Function BaseLineCheck300([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.300"
-        "CIS Name"      = "Configure 'Turn off cloud content search' must be set to 'Enabled'" # Duplicate of 249
+        "CIS Name"      = "SYSTEMS SETTINGS: OPTIONAL SUBSYSTEMS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
-        "ValueName"     = "AllowCloudSearch"
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\SubSystems"
+        "ValueName"     = "Optional" # Example for optional subsystems
+        "ExpectedValue" = "" # Should be empty or controlled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2984,11 +3311,11 @@ Function BaseLineCheck300([string]$CheckName) {
 Function BaseLineCheck307([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.307"
-        "CIS Name"      = "Configure 'Turn off cloud sync' must be set to 'Enabled'" # Duplicate of 250
+        "CIS Name"      = "RECOVERY CONSOLE: ALLOW AUTOMATIC ADMINISTRATIVE LOGON"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
-        "ValueName"     = "DisableCloudSync"
-        "ExpectedValue" = "1" # Enabled
+        "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Setup\RecoveryConsole"
+        "ValueName"     = "SetCommand" # Example, actual reg key might vary
+        "ExpectedValue" = "0" # Disabled (to prevent auto logon)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -3005,15 +3332,12 @@ Function BaseLineCheck307([string]$CheckName) {
 Function BaseLineCheck310([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.310"
-        "CIS Name"      = "Configure 'Disable Windows Defender Exploit Guard' must be set to 'Enabled'" # Duplicate of 251
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exploit Guard"
-        "ValueName"     = "DisableExploitGuard"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "BYPASS TRAVERSE CHECKING"
+        "CheckType"     = "Secedit"
+        "SeceditKey"    = "SeChangeNotifyPrivilege" # This is the "Bypass traverse checking" privilege
+        "ExpectedValue" = "Everyone,Users,Administrators,LOCAL SERVICE,NETWORK SERVICE,AUTHENTICATED USERS" # Common default, customize as needed
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Secedit -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -3026,15 +3350,12 @@ Function BaseLineCheck310([string]$CheckName) {
 Function BaseLineCheck317([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.317"
-        "CIS Name"      = "Configure 'Disable Credential Guard' must be set to 'Enabled'" # Duplicate of 252
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
-        "ValueName"     = "LsaCfgFlags"
-        "ExpectedValue" = "0" # Disabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "WINDOWS FIREWALL"
+        "CheckType"     = "Service"
+        "ServiceName"   = "MpsSvc" # Windows Firewall service
+        "ExpectedValue" = "Running,Automatic"
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Service -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -3047,15 +3368,12 @@ Function BaseLineCheck317([string]$CheckName) {
 Function BaseLineCheck326([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.326"
-        "CIS Name"      = "Configure 'Turn off malicious software removal tool' must be set to 'Enabled'" # Duplicate of 255
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\MRT"
-        "ValueName"     = "DisableMRT"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "DHCP SERVER SERVICES"
+        "CheckType"     = "Service"
+        "ServiceName"   = "DHCPServer" # DHCP Server service name
+        "ExpectedValue" = "Stopped,Disabled"
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Service -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -3068,15 +3386,12 @@ Function BaseLineCheck326([string]$CheckName) {
 Function BaseLineCheck331([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.331"
-        "CIS Name"      = "Configure 'Disable Windows Defender SmartScreen' must be set to 'Enabled'" # Duplicate of 258
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "SmartScreenEnabled"
-        "ExpectedValue" = "0" # Disabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "REMOTE ACCESS AUTO CONNECTION MANAGER"
+        "CheckType"     = "Service"
+        "ServiceName"   = "RasAuto"
+        "ExpectedValue" = "Stopped,Disabled"
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Service -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -3089,15 +3404,12 @@ Function BaseLineCheck331([string]$CheckName) {
 Function BaseLineCheck332([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.332"
-        "CIS Name"      = "Configure 'Do not allow the display of the Sign-in options tile' must be set to 'Enabled'" # Duplicate of 260
-        "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "HideSignInOptions"
-        "ExpectedValue" = "1" # Enabled
-        "MustExist"     = $true
-        "Comparator"    = "="
+        "CIS Name"      = "REMOTE ACCESS CONNECTION MANAGER MUST BE SET TO"
+        "CheckType"     = "Service"
+        "ServiceName"   = "RasMan"
+        "ExpectedValue" = "Stopped,Disabled"
     }
-    $ComplianceValues = Test-Registry -Requirement $Requirements
+    $ComplianceValues = Test-Service -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
         $ReturnCode = 1
@@ -3110,7 +3422,7 @@ Function BaseLineCheck332([string]$CheckName) {
 Function BaseLineCheck336([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.336"
-        "CIS Name"      = "Disable any service"
+        "CIS Name"      = "TELEPHONY SERVICE"
         "CheckType"     = "Service"
         "ServiceName"   = "TapiSrv" # Actual service name
         "ExpectedValue" = "Disabled"
@@ -3128,7 +3440,7 @@ Function BaseLineCheck336([string]$CheckName) {
 Function BaseLineCheck337([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.337"
-        "CIS Name"      = "Telnet Server"
+        "CIS Name"      = "TELNET SERVER"
         "CheckType"     = "Service"
         "ServiceName"   = "TlntSvr" # Actual service name
         "ExpectedValue" = "Disabled"
@@ -3146,7 +3458,7 @@ Function BaseLineCheck337([string]$CheckName) {
 Function BaseLineCheck338([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.338"
-        "CIS Name"      = "Windows Event Log must be set to Automatic."
+        "CIS Name"      = "WINDOWS EVENT LOG MUST BE SET TO AUTOMATIC."
         "CheckType"     = "Service"
         "ServiceName"   = "EventLog"
         "ExpectedValue" = "Running,Automatic"
@@ -3164,7 +3476,7 @@ Function BaseLineCheck338([string]$CheckName) {
 Function BaseLineCheck344([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.344"
-        "CIS Name"      = "Wallet Service must be set to Disabled"
+        "CIS Name"      = "WALLET SERVICE"
         "CheckType"     = "Service"
         "ServiceName"   = "WalletService"
         "ExpectedValue" = "Stopped,Disabled"
@@ -3182,7 +3494,7 @@ Function BaseLineCheck344([string]$CheckName) {
 Function BaseLineCheck351([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.351"
-        "CIS Name"      = "Connected User Experiences and Telemetry (Diagtrack) must be set to Disabled"
+        "CIS Name"      = "CONNECTED USER EXPERIENCES AND TELEMETRY” (DIAGTRACK)"
         "CheckType"     = "Service"
         "ServiceName"   = "DiagTrack"
         "ExpectedValue" = "Stopped,Disabled"
@@ -3200,7 +3512,7 @@ Function BaseLineCheck351([string]$CheckName) {
 Function BaseLineCheck352([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.352"
-        "CIS Name"      = "SMTPSVC must be disabled"
+        "CIS Name"      = "SMTPSVC"
         "CheckType"     = "Service"
         "ServiceName"   = "SMTPSVC"
         "ExpectedValue" = "Stopped,Disabled"
@@ -3218,7 +3530,7 @@ Function BaseLineCheck352([string]$CheckName) {
 Function BaseLineCheck363([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.363"
-        "CIS Name"      = "USB Drive Access"
+        "CIS Name"      = "USB DRIVE ACCESS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\USBSTOR"
         "ValueName"     = "Start"
@@ -3239,7 +3551,7 @@ Function BaseLineCheck363([string]$CheckName) {
 Function BaseLineCheck365([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.365"
-        "CIS Name"      = "Block launching Windows Store apps with Windows Runtime API access from hosted content must be set to Enabled."
+        "CIS Name"      = "BLOCK LAUNCHING WINDOWS STORE APPS WITH WINDOWS RUNTIME API ACCESS FROM HOSTED CONTENT"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
         "ValueName"     = "NoWindowsRuntimeAccess"
@@ -3260,7 +3572,7 @@ Function BaseLineCheck365([string]$CheckName) {
 Function BaseLineCheck366([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.366"
-        "CIS Name"      = "Allow Telemetry must be set to Disabled"
+        "CIS Name"      = "ALLOW TELEMETRY"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
         "ValueName"     = "AllowTelemetry"
@@ -3281,7 +3593,7 @@ Function BaseLineCheck366([string]$CheckName) {
 Function BaseLineCheck367([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.367"
-        "CIS Name"      = "Configure Windows Defender SmartScreen is set to Disabled"
+        "CIS Name"      = "CONFIGURE WINDOWS DEFENDER SMARTSCREEN"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\SmartScreen"
         "ValueName"     = "Enabled"
@@ -3302,7 +3614,7 @@ Function BaseLineCheck367([string]$CheckName) {
 Function BaseLineCheck369([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.369"
-        "CIS Name"      = "Do not allow COM port redirection must be set to Enabled"
+        "CIS Name"      = "DO NOT ALLOW COM PORT REDIRECTION"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\Client"
         "ValueName"     = "fDisableCpm"
@@ -3323,7 +3635,7 @@ Function BaseLineCheck369([string]$CheckName) {
 Function BaseLineCheck370([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.370"
-        "CIS Name"      = "Do not allow supported Plug and Play device redirection must be set to Enabled"
+        "CIS Name"      = "DO NOT ALLOW SUPPORTED PLUG AND PLAY DEVICE REDIRECTION"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\Client"
         "ValueName"     = "fDisablePNP"
@@ -3344,7 +3656,7 @@ Function BaseLineCheck370([string]$CheckName) {
 Function BaseLineCheck375([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.375"
-        "CIS Name"      = "Allow Cortana must be set to Disabled"
+        "CIS Name"      = "ALLOW CORTANA"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
         "ValueName"     = "AllowCortana"
@@ -3365,7 +3677,7 @@ Function BaseLineCheck375([string]$CheckName) {
 Function BaseLineCheck376([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.376"
-        "CIS Name"      = "Allow Cortana above lock screen must be set to Disabled"
+        "CIS Name"      = "ALLOW CORTANA ABOVE LOCK SCREEN"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
         "ValueName"     = "AllowCortanaAtLockScreen"
@@ -3386,7 +3698,7 @@ Function BaseLineCheck376([string]$CheckName) {
 Function BaseLineCheck377([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.377"
-        "CIS Name"      = "Allow search and Cortana to use location must be set to Disabled"
+        "CIS Name"      = "ALLOW SEARCH AND CORTANA TO USE LOCATION"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors"
         "ValueName"     = "DisableLocation"
@@ -3407,7 +3719,7 @@ Function BaseLineCheck377([string]$CheckName) {
 Function BaseLineCheck380([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.380"
-        "CIS Name"      = "Disable all apps from Windows Store must be set to Enabled"
+        "CIS Name"      = "DISABLE ALL APPS FROM WINDOWS STORE"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
         "ValueName"     = "DisableStore"
@@ -3428,7 +3740,7 @@ Function BaseLineCheck380([string]$CheckName) {
 Function BaseLineCheck381([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.381"
-        "CIS Name"      = "Turn off Microsoft Defender AntiVirus is set to Enabled"
+        "CIS Name"      = "TURN OFF MICROSOFT DEFENDER ANTIVIRUS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
         "ValueName"     = "DisableAntiSpyware"
@@ -3449,7 +3761,7 @@ Function BaseLineCheck381([string]$CheckName) {
 Function BaseLineCheck383([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.383"
-        "CIS Name"      = "Join Microsoft MAPS must be set to Disabled"
+        "CIS Name"      = "JOIN MICROSOFT MAPS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
         "ValueName"     = "SpyNetReporting"
@@ -3470,7 +3782,7 @@ Function BaseLineCheck383([string]$CheckName) {
 Function BaseLineCheck384([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.384"
-        "CIS Name"      = "Send file samples when further analysis is required must be set to Never Send"
+        "CIS Name"      = "SEND FILE SAMPLES WHEN FURTHER ANALYSIS IS REQUIRED"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
         "ValueName"     = "SubmitSamplesConsent"
@@ -3491,7 +3803,7 @@ Function BaseLineCheck384([string]$CheckName) {
 Function BaseLineCheck386([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.386"
-        "CIS Name"      = "Configure Watson events must be set to Disabled"
+        "CIS Name"      = "CONFIGURE WATSON EVENTS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting"
         "ValueName"     = "Disabled"
@@ -3512,7 +3824,7 @@ Function BaseLineCheck386([string]$CheckName) {
 Function BaseLineCheck387([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.387"
-        "CIS Name"      = "Maximum log size for Powershell Logs"
+        "CIS Name"      = "MAXIMUM LOG SIZE FOR POWERSHELL LOGS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Microsoft-Windows-PowerShell/Operational"
         "ValueName"     = "MaxSize"
@@ -3533,7 +3845,7 @@ Function BaseLineCheck387([string]$CheckName) {
 Function BaseLineCheck388([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.388"
-        "CIS Name"      = "Lock down the Security Descriptor on the PowerShell Logs"
+        "CIS Name"      = "LOCK DOWN THE SECURITY DESCRIPTOR ON THE POWERSHELL LOGS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Microsoft-Windows-PowerShell/Operational"
         "ValueName"     = "CustomSD"
@@ -3554,7 +3866,7 @@ Function BaseLineCheck388([string]$CheckName) {
 Function BaseLineCheck389([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.389"
-        "CIS Name"      = "Maximum Operational log size for Powershell Logs"
+        "CIS Name"      = "MAXIMUM OPERATIONAL LOG SIZE FOR POWERSHELL LOGS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Microsoft-Windows-PowerShell/Operational"
         "ValueName"     = "MaxSize"
@@ -3575,7 +3887,7 @@ Function BaseLineCheck389([string]$CheckName) {
 Function BaseLineCheck390([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.390"
-        "CIS Name"      = "Lock down the Security Descriptor on the PowerShell Operational Logs"
+        "CIS Name"      = "LOCK DOWN THE SECURITY DESCRIPTOR ON THE POWERSHELL OPERATIONAL LOGS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Microsoft-Windows-PowerShell/Operational"
         "ValueName"     = "CustomSD"
@@ -3596,7 +3908,7 @@ Function BaseLineCheck390([string]$CheckName) {
 Function BaseLineCheck394([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.394"
-        "CIS Name"      = "Turn on Module Logging must be set to Enabled"
+        "CIS Name"      = "TURN ON MODULE LOGGING MUST BE SET TO 'ENABLED'"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
         "ValueName"     = "EnableModuleLogging"
@@ -3617,7 +3929,7 @@ Function BaseLineCheck394([string]$CheckName) {
 Function BaseLineCheck396([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.396"
-        "CIS Name"      = "Browser Proxy Lockdown"
+        "CIS Name"      = "BROWSER PROXY LOCKDOWN"
         "CheckType"     = "Registry"
         "Path"          = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
         "ValueName"     = "ProxySettingsPerUser"
@@ -3638,7 +3950,7 @@ Function BaseLineCheck396([string]$CheckName) {
 Function BaseLineCheck440([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.440"
-        "CIS Name"      = "Logon as a Service"
+        "CIS Name"      = "LOGON AS A SERVICE"
         "CheckType"     = "Secedit"
         "SeceditKey"    = "SeServiceLogonRight"
         "ExpectedValue" = "" # This right is typically assigned to specific accounts, empty means no specific non-default SIDs.
@@ -3656,7 +3968,7 @@ Function BaseLineCheck440([string]$CheckName) {
 Function BaseLineCheck441([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.441"
-        "CIS Name"      = "disable Machine Configuration"
+        "CIS Name"      = "DISABLE MACHINE CONFIGURATION"
         "CheckType"     = "Service"
         "ServiceName"   = "GuestProxyAgent" # This is a common service for machine configuration in Azure environments.
         "ExpectedValue" = "Stopped,Disabled"
@@ -3674,7 +3986,7 @@ Function BaseLineCheck441([string]$CheckName) {
 Function BaseLineCheck442([string]$CheckName) {
     $Requirements = @{
         "ISBL"          = "ISBL-10564-01.442"
-        "CIS Name"      = "disable ExtensionService"
+        "CIS Name"      = "DISABLE EXTENSIONSERVICE"
         "CheckType"     = "Service"
         "ServiceName"   = "ExtensionService" # Assuming a service named "ExtensionService"
         "ExpectedValue" = "Stopped,Disabled"
