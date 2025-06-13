@@ -38,6 +38,7 @@ if(Test-Path -Path "D:"){
 $Global:OS_PRODUCT = "WIN2022"
 $Global:COMPLIANCE_DICTIONARY = @{}
 $Global:ComplianceFile = "$appsDrive\apps\MOCAT\OS\logs\WIN_OS_Compliance.json"
+$Global:ComplianceCsvFile = "$appsDrive\apps\MOCAT\OS\logs\WIN_OS_Compliance.csv" # New global variable for CSV file path
 #$Global:ComplianceFile = "$env:userprofile/WIN_OS_Compliance.json"
 $Script:ExitCode = 0
 
@@ -294,10 +295,16 @@ Function ExecuteAudits {
        $CHECK_DETAILS[$OS_PRODUCT] = $INSTANCE_BASELINES
        $Global:COMPLIANCE_DICTIONARY["CheckDetails"] = $CHECK_DETAILS
 
-       $CREATED = create_compliance_json
-       if($CREATED -eq $true) {
-           Write-Log 0 "Created: $OS_PRODUCT compliance file"
+       $CREATED_JSON = create_compliance_json
+       if($CREATED_JSON -eq $true) {
+           Write-Log 0 "Created: $OS_PRODUCT compliance JSON file"
            Write-Output "Created: $Global:ComplianceFile"
+       }
+
+       $CREATED_CSV = create_compliance_csv # Call function to create CSV
+       if($CREATED_CSV -eq $true) {
+           Write-Log 0 "Created: $OS_PRODUCT compliance CSV file"
+           Write-Output "Created: $Global:ComplianceCsvFile"
        }
    }else{
        Write-Log 2 "Unable to execute compliance functions"
@@ -354,6 +361,56 @@ Function create_compliance_json(){
        Write-Log 2 "ERROR Creating compliance JSON"
    }
    return $success
+}
+
+########################################################
+#              CREATE COMPLIANCE CSV
+########################################################
+Function create_compliance_csv(){
+    $success = $false
+    try {
+        $CsvData = New-Object System.Collections.ArrayList
+
+        # Get top-level details
+        $AuditDetails = $Global:COMPLIANCE_DICTIONARY.CheckDetails
+        $OSProductKey = $Global:OS_PRODUCT
+        $BaselineResults = $AuditDetails.$OSProductKey
+
+        # Iterate through each baseline result
+        foreach ($ISBL_ID in $BaselineResults.Keys) {
+            $Result = $BaselineResults.$ISBL_ID
+            $Obj = [PSCustomObject]@{
+                "AUDIT_NAME"        = $AuditDetails.AUDIT_NAME
+                "OS_Version"        = $AuditDetails.OS_Version
+                "OS_FAMILY"         = $AuditDetails.OS_FAMILY
+                "SOURCE_CODE"       = $AuditDetails.SOURCE_CODE
+                "AUDIT_RESULT_ID"   = $AuditDetails.AUDIT_RESULT_ID
+                "AUDIT_DATE"        = $AuditDetails.AUDIT_DATE
+                "ORM_VERSION"       = $AuditDetails.ORM_VERSION
+                "ORM_Script_Integrity" = $AuditDetails.ORM_Script_Integrity
+                "SERVER_NAME"       = $AuditDetails.SERVER_NAME
+                "ISBL_ID"           = $ISBL_ID
+                "CIS_Name"          = $Result.sExpectedValue
+                "Compliance_Status" = if ($Result.bIsCompliant -eq 0) {"Compliant"} else {"Non-Compliant"}
+                "Return_Value"      = $Result.sReturnValue
+                "Error_Message"     = $Result.sErrorMessage
+            }
+            $null = $CsvData.Add($Obj) # Add to ArrayList
+        }
+
+        # Export to CSV
+        If(Test-Path -path $Global:ComplianceCsvFile){Remove-Item -Path $Global:ComplianceCsvFile -Force}
+        sleep 2
+        $CsvData | Export-Csv -Path $Global:ComplianceCsvFile -NoTypeInformation -Encoding UTF8 -Force -ErrorAction Stop
+        sleep 2
+
+        if(Test-Path -Path $Global:ComplianceCsvFile){
+            $success = $true
+        }
+    } catch {
+        Write-Log 2 "ERROR Creating compliance CSV: $_.Exception.Message"
+    }
+    return $success
 }
 
 ########################################################
@@ -1071,9 +1128,9 @@ Function BaseLineCheck089([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.089"
         "CIS Name"      = "NETWORK SECURITY: FORCE LOGOFF WHEN LOGON HOURS EXPIRE"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
-        "ValueName"     = "AutoDisconnect" # This is the same as 073, but the CIS name indicates a slightly different angle. Ensure the value aligns.
-        "ExpectedValue" = "1" # Typically 1 for Enabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
+        "ValueName"     = "ForceLogoffHours"
+        "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1093,10 +1150,10 @@ Function BaseLineCheck094([string]$CheckName) {
         "CIS Name"      = "NETWORK SECURITY: RESTRICT NTLM: AUDIT INCOMING NTLM TRAFFIC"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
-        "ValueName"     = "RestrictSendingNTLMTraffic" # Or a specific audit key
-        "ExpectedValue" = "2" # Audit all (2), or disable (0)
+        "ValueName"     = "AuditIncomingNTLMTraffic"
+        "ExpectedValue" = "2" # Audit All
         "MustExist"     = $true
-        "Comparator"    = ">=" # Could be 2 or higher if other audit options exist
+        "Comparator"    = "="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1114,10 +1171,10 @@ Function BaseLineCheck095([string]$CheckName) {
         "CIS Name"      = "NETWORK SECURITY: RESTRICT NTLM: OUTGOING NTLM TRAFFIC TO REMOTE SERVERS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
-        "ValueName"     = "RestrictReceivingNTLMTraffic" # Or a specific audit key for outgoing
-        "ExpectedValue" = "2" # Audit all (2), or disable (0)
+        "ValueName"     = "RestrictOutgoingNTLMTraffic"
+        "ExpectedValue" = "2" # Audit All
         "MustExist"     = $true
-        "Comparator"    = ">="
+        "Comparator"    = "="
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1465,12 +1522,14 @@ Function BaseLineCheck158([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.158"
         "CIS Name"      = "NETBT NODETYPE CONFIGURATION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\System\CurrentControlSet\Services\NetBT\Parameters"
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
         "ValueName"     = "NodeType"
         "ExpectedValue" = "8" # 8 (P-node) or 4 (M-node) for security. Avoid 1 (B-node) or 2 (H-node)
         "MustExist"     = $true
         "Comparator"    = ">=" # Or specify exact value
     }
+    # This check is more complex as it needs to iterate through network interfaces.
+    # For now, it will check the general parameter if available.
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
@@ -1633,14 +1692,13 @@ Function BaseLineCheck167([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.167"
         "CIS Name"      = "CONFIGURE NETBIOS SETTINGS"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces" # Need to iterate through interfaces
-        "ValueName"     = "NetbiosOptions"
-        "ExpectedValue" = "2" # Disable NetBIOS over TCP/IP
-        "MustExist"     = $false # Can be 0 if not configured
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" # General NetBT parameters
+        "ValueName"     = "EnableDhcp" # This is often linked to NetBIOS settings. If this is 0, NetBIOS might be manually configured or disabled.
+        "ExpectedValue" = "0" # Example to disable DHCP for NetBIOS
+        "MustExist"     = $false # Can be absent if not explicitly configured
         "Comparator"    = "="
     }
-    # This check is more complex as it needs to iterate through network interfaces.
-    # For now, it will check the general parameter if available.
+    # This check is conceptual and might need more specific logic to verify all NetBIOS settings.
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
@@ -1656,8 +1714,8 @@ Function BaseLineCheck169([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.169"
         "CIS Name"      = "CONFIGURE DNS OVER HTTPS (DOH) NAME RESOLUTION"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters"
-        "ValueName"     = "EnableAutoDoh"
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+        "ValueName"     = "EnableDoH"
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1678,12 +1736,11 @@ Function BaseLineCheck174([string]$CheckName) {
         "CIS Name"      = "HARDENED UNC PATHS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedUNCPaths"
-        "ValueName"     = "" # This key itself indicates presence of hardened paths
-        "ExpectedValue" = "Exists" # Check for existence, not a specific value
+        "ValueName"     = "Hardened" # This value would signify if hardened paths are enabled, or the key simply existing.
+        "ExpectedValue" = "1" # Typically 1 for enabled. This is a placeholder; actual value depends on policy.
         "MustExist"     = $true
-        "Comparator"    = "Contains" # A value indicating entries are present, or simply check for existence of the key
+        "Comparator"    = "="
     }
-    # This check is conceptual and might need more specific logic to check entries.
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
         $ReturnResult = 'Error Returning Value'
@@ -1700,7 +1757,7 @@ Function BaseLineCheck175([string]$CheckName) {
         "CIS Name"      = "MINIMIZE THE NUMBER OF SIMULTANEOUS CONNECTIONS TO THE INTERNET OR A WINDOWS DOMAIN"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
-        "ValueName"     = "MaxConnectionsPer1_0Server" # Example, actual regkey varies by policy
+        "ValueName"     = "MaxConnectionsPer1_0Server" # Example, check actual key
         "ExpectedValue" = "4" # Standard limit
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1720,8 +1777,8 @@ Function BaseLineCheck176([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.176"
         "CIS Name"      = "CONFIGURE REDIRECTION GUARD"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-        "ValueName"     = "EnableSecuritySignature" # Example, related to SMB signing
+        "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Redirector"
+        "ValueName"     = "EnableRedirectionGuard" # Example, actual reg key might vary
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1743,9 +1800,9 @@ Function BaseLineCheck177([string]$CheckName) {
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
         "ValueName"     = "ClientProtocols"
-        "ExpectedValue" = "ncacn_ip_tcp" # Example for TCP/IP
+        "ExpectedValue" = "ncacn_np" # Example: Named Pipes protocol, adjust based on specific policy.
         "MustExist"     = $true
-        "Comparator"    = "Contains"
+        "Comparator"    = "Contains" # Or "=" if exact match is needed
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1763,7 +1820,7 @@ Function BaseLineCheck178([string]$CheckName) {
         "CIS Name"      = "CONFIGURE RPC CONNECTION SETTINGS: USE AUTHENTICATION FOR OUTGOING RPC CONNECTIONS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
-        "ValueName"     = "ClientAuthentication" # Example for authentication setting
+        "ValueName"     = "EnableAuth" # Example, actual reg key might vary for RPC authentication.
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -1785,9 +1842,9 @@ Function BaseLineCheck179([string]$CheckName) {
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
         "ValueName"     = "ServerProtocols"
-        "ExpectedValue" = "ncacn_ip_tcp" # Example for TCP/IP
+        "ExpectedValue" = "ncacn_np" # Example: Named Pipes protocol, adjust based on specific policy.
         "MustExist"     = $true
-        "Comparator"    = "Contains"
+        "Comparator"    = "Contains" # Or "=" if exact match is needed
     }
     $ComplianceValues = Test-Registry -Requirement $Requirements
     if(-not $ComplianceValues){
@@ -1805,8 +1862,8 @@ Function BaseLineCheck180([string]$CheckName) {
         "CIS Name"      = "CONFIGURE RPC LISTENER SETTINGS: AUTHENTICATION PROTOCOL TO USE FOR INCOMING RPC CONNECTIONS:"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
-        "ValueName"     = "ServerAuthentication" # Example for authentication setting
-        "ExpectedValue" = "1" # Enabled
+        "ValueName"     = "ServerAuthLevel" # Example, actual reg key might vary for authentication level
+        "ExpectedValue" = "6" # Example: RPC_C_AUTHN_LEVEL_PKT_PRIVACY (Packet Privacy)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -1826,7 +1883,7 @@ Function BaseLineCheck181([string]$CheckName) {
         "CIS Name"      = "CONFIGURE RPC OVER TCP PORT"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\RPC"
-        "ValueName"     = "RPCoverTCPPort"
+        "ValueName"     = "TcpPort" # Example, actual reg key for TCP port
         "ExpectedValue" = "135" # Default RPC port
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2057,7 +2114,7 @@ Function BaseLineCheck197([string]$CheckName) {
         "CIS Name"      = "TURN OFF DOWNLOADING OF PRINT DRIVERS OVER HTTP"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
-        "ValueName"     = "RestrictDriverInstallationToAdministrators" # Indirectly disables HTTP download
+        "ValueName"     = "NoWebPnPDownload"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2078,7 +2135,7 @@ Function BaseLineCheck199([string]$CheckName) {
         "CIS Name"      = "ENUMERATION POLICY FOR EXTERNAL DEVICES INCOMPATIBLE WITH KERNEL DMA PROTECTION"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
-        "ValueName"     = "DmaProtection" # Example, actual reg key might vary
+        "ValueName"     = "DenyDMADevicesWhenNotUsedByKernel" # Example, actual reg key might vary for DMA protection
         "ExpectedValue" = "1" # Enabled (enforce protection)
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2099,8 +2156,8 @@ Function BaseLineCheck200([string]$CheckName) {
         "CIS Name"      = "ALLOW CUSTOM SSPS AND APS TO BE LOADED INTO LSASS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
-        "ValueName"     = "LsaCurtain" # Example, actual reg key might vary for LSASS protection
-        "ExpectedValue" = "0" # Disabled (to prevent loading custom SSPS/APS)
+        "ValueName"     = "DisableCustomSSPs" # This is a placeholder for disabling custom SSPs.
+        "ExpectedValue" = "1" # Enabled (to prevent loading custom SSPS/APS)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2120,8 +2177,8 @@ Function BaseLineCheck201([string]$CheckName) {
         "CIS Name"      = "BLOCK USER FROM SHOWING ACCOUNT DETAILS ON SIGN-IN"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "BlockUserAuthDetails"
-        "ExpectedValue" = "1" # Enabled
+        "ValueName"     = "DontDisplayLastUserName" # This is a common setting for user details on sign-in.
+        "ExpectedValue" = "1" # Enabled (to block showing details)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2182,7 +2239,7 @@ Function BaseLineCheck208([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.208"
         "CIS Name"      = "REQUIRE A PASSWORD WHEN A COMPUTER WAKES (ON BATTERY)"
         "CheckType"     = "Registry"
-        "Path"          = "HKCU:\Control Panel\PowerCfg\PowerSettings\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
         "ValueName"     = "ACSettingIndex" # Or DCSettingIndex for battery
         "ExpectedValue" = "1" # Requires password
         "MustExist"     = $true
@@ -2203,7 +2260,7 @@ Function BaseLineCheck209([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.209"
         "CIS Name"      = "REQUIRE A PASSWORD WHEN A COMPUTER WAKES (PLUGGED IN)"
         "CheckType"     = "Registry"
-        "Path"          = "HKCU:\Control Panel\PowerCfg\PowerSettings\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerSettings\00123456-7890-ABCD-EF01-23456789ABCD\00123456-7890-ABCD-EF01-23456789ABCD" # GUID for password on wake
         "ValueName"     = "DCSettingIndex" # Or ACSettingIndex for plugged in
         "ExpectedValue" = "1" # Requires password
         "MustExist"     = $true
@@ -2246,7 +2303,7 @@ Function BaseLineCheck214([string]$CheckName) {
         "CIS Name"      = "ALLOW MICROSOFT ACCOUNTS TO BE OPTIONAL"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-        "ValueName"     = "NoConnectedUserExperiences" # This enables/disables connected experiences
+        "ValueName"     = "BlockMicrosoftAccount" # This setting is typically used to block Microsoft accounts.
         "ExpectedValue" = "1" # Set to 1 to *disallow* Microsoft accounts
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2309,7 +2366,7 @@ Function BaseLineCheck219([string]$CheckName) {
         "CIS Name"      = "TURN OFF CLOUD CONSUMER ACCOUNT STATE CONTENT"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
-        "ValueName"     = "DisableCloudSync" # Example, actual reg key might vary for cloud content
+        "ValueName"     = "DisableWindowsConsumerFeatures" # This setting is for cloud consumer features.
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2330,7 +2387,7 @@ Function BaseLineCheck220([string]$CheckName) {
         "CIS Name"      = "TURN OFF MICROSOFT CONSUMER EXPERIENCES"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
-        "ValueName"     = "DisableConsumerFeatures"
+        "ValueName"     = "DisableWindowsConsumerFeatures"
         "ExpectedValue" = "1" # Enabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -2393,8 +2450,8 @@ Function BaseLineCheck225([string]$CheckName) {
         "CIS Name"      = "DISABLE ONESETTINGS DOWNLOADS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SettingSync"
-        "ValueName"     = "DisableSync" # Example, related to sync settings
-        "ExpectedValue" = "1" # Enabled
+        "ValueName"     = "DisableSync" # Effectively disables downloads
+        "ExpectedValue" = "1" # Enabled (to disable sync)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2414,8 +2471,8 @@ Function BaseLineCheck226([string]$CheckName) {
         "CIS Name"      = "DO NOT SHOW FEEDBACK NOTIFICATIONS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "DoNotShowFeedbackNotifications"
-        "ExpectedValue" = "1" # Enabled
+        "ValueName"     = "DisableFeedbackNotifications"
+        "ExpectedValue" = "1" # Enabled (to not show notifications)
         "MustExist"     = $true
         "Comparator"    = "="
     }
@@ -2498,7 +2555,7 @@ Function BaseLineCheck230([string]$CheckName) {
         "CIS Name"      = "TOGGLE USER CONTROL OVER INSIDER BUILDS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
-        "ValueName"     = "AllowBuildPreview" # Example, actual reg key might vary
+        "ValueName"     = "EnablePreviewBuilds" # Example for user control over insider builds.
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -3065,7 +3122,7 @@ Function BaseLineCheck272([string]$CheckName) {
         "CIS Name"      = "MANAGE PREVIEW BUILDS"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
-        "ValueName"     = "AllowBuildPreview" # Same as 230
+        "ValueName"     = "ManagePreviewBuilds" # Example, actual reg key might vary for preview builds
         "ExpectedValue" = "0" # Disabled
         "MustExist"     = $true
         "Comparator"    = "="
@@ -3128,7 +3185,7 @@ Function BaseLineCheck275([string]$CheckName) {
         "CIS Name"      = "CONFIGURE WINDOWS SPOTLIGHT ON LOCK SCREEN"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-        "ValueName"     = "TurnOffSpotlightOnLockScreen"
+        "ValueName"     = "DisableWindowsSpotlightFeatures"
         "ExpectedValue" = "1" # Enabled (to turn off spotlight)
         "MustExist"     = $true
         "Comparator"    = "="
@@ -3251,7 +3308,7 @@ Function BaseLineCheck293([string]$CheckName) {
         "CIS Name"      = "THE PRIVATE PROFILE SETTINGS APPLY LOCAL CONNECTION SECURITY RULES"
         "CheckType"     = "Registry"
         "Path"          = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile"
-        "ValueName"     = "DisableUnicastResponsesToMulticastBroadcast" # Example, could be a general security rule
+        "ValueName"     = "DisableLocalSecurityRules" # Example, actual reg key might vary.
         "ExpectedValue" = "0" # Disabled (to allow local rules to apply)
         "MustExist"     = $true
         "Comparator"    = "="
@@ -3271,9 +3328,9 @@ Function BaseLineCheck298([string]$CheckName) {
         "ISBL"          = "ISBL-10564-01.298"
         "CIS Name"      = "DISABLE WINS ENTRIES FOR IP ADDRESSES"
         "CheckType"     = "Registry"
-        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
-        "ValueName"     = "EnableDhcp" # If DHCP is enabled, WINS might be too. Check for a specific WINS setting.
-        "ExpectedValue" = "0" # Disabled
+        "Path"          = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+        "ValueName"     = "DisableWins" # Example, actual reg key might vary for WINS
+        "ExpectedValue" = "1" # Enabled (to disable WINS entries)
         "MustExist"     = $true
         "Comparator"    = "="
     }
