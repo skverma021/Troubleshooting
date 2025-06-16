@@ -1,34 +1,15 @@
-# Define parameters
-$remoteComputer = "RemotePC01"                      # Replace with your remote computer name
-$localScriptPath = "C:\Scripts\MyScript.ps1"        # Local .ps1 file path
-$localXmlPath = "C:\Scripts\MyTask.xml"             # Local .xml file path
-$remoteFolder = "I:\cnrycleanup"                    # Remote destination folder
-$taskName = "MyScheduledTask"                       # Scheduled Task name
-
-# Step 1: Ensure remote folder exists, or create it
-Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
-    $path = "I:\cnrycleanup"
-    if (-Not (Test-Path -Path $path)) {
-        New-Item -Path $path -ItemType Directory -Force | Out-Null
-    }
-}
-
-# Step 2: Define full UNC paths for file copy
-$remoteScriptPath = "\\$remoteComputer\I$\cnrycleanup\MyScript.ps1"
-$remoteXmlPath    = "\\$remoteComputer\I$\cnrycleanup\MyTask.xml"
-
-# Step 3: Copy files to remote machine
-Copy-Item -Path $localScriptPath -Destination $remoteScriptPath -Force
-Copy-Item -Path $localXmlPath -Destination $remoteXmlPath -Force
-
-# Step 4: Import the task on the remote computer
-Invoke-Command -ComputerName $remoteComputer -ScriptBlock {
-    $taskXmlPath = "I:\cnrycleanup\MyTask.xml"
-    $taskName = "MyScheduledTask"
-
-    if (Test-Path $taskXmlPath) {
-        schtasks.exe /Create /TN $taskName /XML $taskXmlPath /F
-    } else {
-        Write-Error "Scheduled task XML file not found at $taskXmlPath"
-    }
-}
+Subject: Follow-up: Blocking Unknown Binaries on Windows Servers - Case 2504250030007423
+Hi Microsoft Support Team,
+This email is a follow-up to our previous discussion regarding blocking unknown binaries on our Windows servers, referencing case ID 2504250030007423.
+As you know, our primary objective is to prevent any unapproved executables from running on these servers. We implemented the setting you previously suggested, "Enable: for non-managed application only," but unfortunately, our testing indicates that it has not been effective in achieving this goal. We are still observing instances where what we consider "unknown" binaries are able to execute.
+Could you please provide more precise guidance on how to effectively block all unknown binaries on Windows servers? We are looking for a robust solution, ideally a whitelisting approach, that allows only explicitly approved applications to run.
+Specifically, we'd appreciate your insights on:
+ * How to achieve a comprehensive whitelisting strategy for server environments.
+ * The recommended Microsoft technology (e.g., Windows Defender Application Control (WDAC) or AppLocker) for this purpose, given our requirement for strong security.
+ * Best practices for initial deployment, including how to identify and baseline all legitimate applications to build an effective policy without causing operational disruption.
+We're eager to implement a solution that provides the necessary security for our server infrastructure.
+Thank you for your continued assistance.
+Sincerely,
+[Your Name]
+[Your Title]
+[Your Company]
