@@ -1,0 +1,45 @@
+# Define the input and output file paths
+$jsonFilePath = "D:\mocat\compliance.json"
+$csvFilePath = "D:\mocat\compliance.csv"
+
+# Check if the JSON file exists
+if (-not (Test-Path -Path $jsonFilePath)) {
+    Write-Host "Error: The JSON file was not found at $jsonFilePath"
+    return
+}
+
+# Read the JSON file content
+$jsonContent = Get-Content -Path $jsonFilePath | Out-String
+
+# Convert the JSON content to a PowerShell object
+$jsonObject = $jsonContent | ConvertFrom-Json
+
+# Access the "WIN2022" object which contains the compliance details
+$complianceDetails = $jsonObject.CheckDetails.WIN2022
+
+# Initialize an array to hold the formatted data
+$dataToExport = @()
+
+# Iterate through each key-value pair in the compliance details object
+foreach ($key in $complianceDetails.PSObject.Properties.Name) {
+    # Get the value for the current key
+    $item = $complianceDetails.$key
+    
+    # Create a custom object with the desired properties
+    $customObject = [PSCustomObject]@{
+        Id = $key
+        ErrorMessage = $item.sErrorMessage
+        IsCompliant = $item.bIsCompliant
+        ReturnValue = $item.sReturnValue
+        ExpectedValue = $item.sExpectedValue
+    }
+    
+    # Add the custom object to the array
+    $dataToExport += $customObject
+}
+
+# Export the data to a CSV file
+$dataToExport | Export-Csv -Path $csvFilePath -NoTypeInformation
+
+Write-Host "JSON file converted to CSV successfully!"
+Write-Host "Output file saved to $csvFilePath"
