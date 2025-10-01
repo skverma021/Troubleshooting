@@ -1,0 +1,110 @@
+<#
+.SYNOPSIS
+Maps a network drive using stored encrypted credentials and finds the next available drive letter.
+
+.DESCRIPTION
+This script is designed for secure and automatic network drive mapping.
+It reads a securely exported credential file (.xml) and attempts to map
+a specified network share. If the preferred drive letter is in use, it searches
+for the next available letter, starting from the preferred letter and moving backwards.
+
+.PARAMETER Path
+The full UNC path of the network share to map (e.g., \\server\share).
+
+.PARAMETER PreferredDriveLetter
+The first drive letter to attempt mapping. If in use, the script searches backwards. Defaults to 'L'.
+
+.PREREQUISITES
+You MUST first create a secure credential file using Export-Clixml. See documentation for details.
+#>
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$Path = "\\SERVERNAME\SHARENAME", # <<< CHANGE THIS TO YOUR NETWORK PATH
+
+    [string]$PreferredDriveLetter = 'L' # Start search from L: backwards if in use.
+)
+
+# --- Configuration ---
+# NOTE: This path MUST match the path used when running Export-Clixml in Step 1.
+$CredentialFilePath = "C:\Scripts\NetworkCred.xml"
+
+# --- Functions ---
+
+function Find-AvailableDriveLetter {
+    <#
+    .SYNOPSIS
+    Finds the first available drive letter starting from a given letter and moving backwards.
+    #>
+    param(
+        [char]$StartLetter
+    )
+    
+    # Get all used drive letters in the FileSystem provider
+    $UsedLetters = (Get-PSDrive -PSProvider FileSystem | Select-Object -ExpandProperty Name | Sort-Object -Unique)
+    $CurrentASCII = [int]$StartLetter.ToUpper()
+
+    Write-Host "Searching for available drive letter starting from $($StartLetter):..." -ForegroundColor DarkYellow
+
+    # Iterate backwards through ASCII values
+    while ($CurrentASCII -ge [int]'A') {
+        $CurrentLetter = [char]$CurrentASCII
+        if ($CurrentLetter -notin $UsedLetters) {
+            Write-Host "Found available drive letter: $($CurrentLetter):" -ForegroundColor Green
+            return $CurrentLetter
+        }
+        $CurrentASCII--
+    }
+    
+    # If the loop finishes without finding a letter
+    Write-Error "No available drive letter found between A and Z."
+    return $null 
+}
+
+# --- Main Script Block ---
+
+# Check for the secure credential file
+if (-not (Test-Path $CredentialFilePath)) {
+    Write-Error "Credential file not found at: $CredentialFilePath. Please run the prerequisite steps first."
+    exit 1
+}
+
+try {
+    # 1. Import the securely stored credentials
+    Write-Host "Importing secure credentials..."
+    $Cred = Import-Clixml -Path $CredentialFilePath
+
+    # 2. Determine the drive letter
+    $PreferredLetter = $PreferredDriveLetter.ToUpper()[0]
+    $DriveLetter = Find-AvailableDriveLetter -StartLetter $PreferredLetter
+
+    if (-not $DriveLetter) {
+        Write-Error "Exiting script because no suitable drive letter could be found."
+        exit 1
+    }
+
+    $DriveName = "$DriveLetter"
+    $FullDriveLetter = "$DriveLetter`:"
+
+    # 3. Map the network drive using New-PSDrive
+    Write-Host "Attempting to map network path '$Path' to drive letter '$FullDriveLetter'..."
+    
+    # Use -Persist to make the mapping available after reboot (permanent)
+    $NewDrive = New-PSDrive -Name $DriveName `
+                            -PSProvider FileSystem `
+                            -Root $Path `
+                            -Credential $Cred `
+                            -Persist `
+                            -ErrorAction Stop
+
+    Write-Host "--------------------------------------------------------"
+    Write-Host "SUCCESS: Drive mapped!" -ForegroundColor Green
+    Write-Host "Mapped Drive: $($NewDrive.Name)$($NewDrive.DisplayRoot)"
+    Write-Host "Path: $($NewDrive.Root)"
+    Write-Host "--------------------------------------------------------"
+    
+}
+catch {
+    Write-Error "An error occurred during drive mapping. Check network connectivity, permissions, and the validity of your credential file."
+    Write-Host "Error Details: $($_.Exception.Message)"
+    exit 1
+}
